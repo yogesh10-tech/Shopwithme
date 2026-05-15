@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>PasalPro</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#166534">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PasalPro">
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{
+  --p1:#14532d;--p2:#166534;--p3:#16a34a;--p4:#4ade80;--pl:#f0fdf4;--pl2:#dcfce7;
+  --red:#dc2626;--amber:#d97706;--blue:#2563eb;--purple:#7c3aed;--indigo:#4f46e5;
+  --bg:#f6f8f6;--card:#ffffff;--txt:#0f1410;--sub:#6b7280;--bdr:#e5e7eb;
+  --sh:0 1px 8px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);
+  --sh2:0 4px 24px rgba(0,0,0,0.10);--r:18px;
+}
+[data-dark="true"]{
+  --bg:#0d1117;--card:#161b22;--txt:#e6edf3;--sub:#8b949e;--bdr:#30363d;
+  --sh:0 1px 8px rgba(0,0,0,0.3),0 4px 16px rgba(0,0,0,0.2);--sh2:0 4px 24px rgba(0,0,0,0.5);
+  --pl:#0d2818;--pl2:#14372a;
+}
+*{font-family:'Mukta',sans-serif!important;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;background:var(--bg);height:100%;overflow:hidden;color:var(--txt);}
+#root{height:100%;}
+.S{overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.S::-webkit-scrollbar{width:2px;}
+.S::-webkit-scrollbar-thumb{background:var(--p4);border-radius:4px;opacity:.5;}
+/* OVERLAY */
+.OV{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:800;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);}
+.SH{background:var(--card);border-radius:28px 28px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px);}
+@media(min-width:600px){.SH{max-width:480px;border-radius:28px;margin-bottom:24px;max-height:86vh;}}
+.SU{animation:SU .28s cubic-bezier(.34,1.56,.64,1);}
+@keyframes SU{from{transform:translateY(44px);opacity:0}to{transform:translateY(0);opacity:1}}
+.FI{animation:FI .2s ease;}
+@keyframes FI{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* INPUTS */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type=number]{-moz-appearance:textfield;}
+.inp{width:100%;border:2px solid var(--bdr);border-radius:14px;padding:13px 16px;font-size:15px;background:var(--card);color:var(--txt);outline:none;transition:border-color .2s,box-shadow .2s;}
+.inp:focus{border-color:var(--p3);box-shadow:0 0 0 4px rgba(22,163,74,.1);}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5'%3E%3Cpolyline points='6,9 12,15 18,9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
+/* BUTTONS */
+.btn{border:none;border-radius:14px;padding:14px 20px;font-weight:700;font-size:15px;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s,opacity .12s;}
+.btn:active{transform:scale(.96);opacity:.85;}
+.btn:disabled{opacity:.42;cursor:not-allowed;}
+.Bp{background:linear-gradient(135deg,var(--p2),var(--p3));color:#fff;box-shadow:0 4px 16px rgba(22,163,74,.3);}
+.Bo{background:transparent;color:var(--txt);border:2px solid var(--bdr);}
+.Br{background:#fee2e2;color:var(--red);border:none;}
+/* CARD */
+.cd{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--sh);border:1px solid var(--bdr);}
+/* BOTTOM NAV */
+.BN{position:fixed;bottom:0;left:0;right:0;z-index:400;background:var(--card);border-top:1px solid var(--bdr);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -4px 24px rgba(0,0,0,.06);}
+/* TOAST */
+.TST{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:11px 24px;border-radius:40px;font-size:13px;font-weight:600;z-index:900;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.35);animation:TI .28s ease;}
+@keyframes TI{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+/* SPINNER */
+.SP{width:20px;height:20px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:SP .65s linear infinite;}
+@keyframes SP{to{transform:rotate(360deg)}}
+/* BADGE */
+.bdg{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;}
+/* PILL */
+.pil{display:flex;align-items:center;gap:6px;flex-shrink:0;padding:6px 14px;border-radius:20px;border:2px solid;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;background:transparent;}
+/* STAT CARD */
+.stc{border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:transform .13s;}
+.stc:active{transform:scale(.95);}
+/* SKEL */
+.sk{border-radius:8px;background:linear-gradient(90deg,var(--bdr) 25%,var(--pl) 50%,var(--bdr) 75%);background-size:200%;animation:sk 1.4s infinite;}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* SWITCH */
+.sw{width:48px;height:26px;border-radius:13px;display:flex;align-items:center;padding:0 3px;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.sw-k{width:20px;height:20px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.22);transition:transform .2s;}
+</style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const{useState,useEffect,useRef,useMemo,useCallback}=React;
+
+/* ══ FIREBASE ══════════════════════════════════════════════════════════════ */
+if(!firebase.apps.length)firebase.initializeApp({
+  apiKey:"AIzaSyCUMRDqCEexgnDBxv1W_jz7hMx-XnzKMZo",
+  authDomain:"shop-774c0.firebaseapp.com",
+  databaseURL:"https://shop-774c0-default-rtdb.firebaseio.com",
+  projectId:"shop-774c0",
+  storageBucket:"shop-774c0.firebasestorage.app",
+  messagingSenderId:"461583346678",
+  appId:"1:461583346678:web:9cfdd1e3c2ced97447b5d7"
+});
+const auth=firebase.auth();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+const db=firebase.database();
+
+/* ══ CONSTANTS ═════════════════════════════════════════════════════════════ */
+const ADMIN_EMAIL="yogeshchapagain733@gmail.com"; // YOUR admin email
+
+/* ══ UTILS ══════════════════════════════════════════════════════════════════ */
+const now=()=>Date.now();
+const oa=(o={})=>Object.entries(o||{}).map(([id,v])=>({id,...v}));
+const fmt=n=>`रु.${Number(n||0).toLocaleString('en-IN')}`;
+const fmts=n=>{const v=Number(n||0);if(v>=1e5)return`रु.${(v/1e5).toFixed(1)}L`;if(v>=1000)return`रु.${(v/1000).toFixed(1)}k`;return`रु.${v.toLocaleString('en-IN')}`;};
+const fmtD=t=>{if(!t)return'';return new Date(t).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'});};
+const fmtT=t=>{if(!t)return'';return new Date(t).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});};
+const isToday=t=>{if(!t)return false;const d=new Date(t),n=new Date();return d.toDateString()===n.toDateString();};
+const inDays=(t,d)=>t&&(Date.now()-t)<=d*864e5;
+const inMonth=t=>{if(!t)return false;const d=new Date(t),n=new Date();return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();};
+const dayL=d=>['S','M','T','W','T','F','S'][d];
+const genCode=()=>Math.random().toString(36).slice(2,8).toUpperCase();
+const compImg=(file,mw=800,q=.72)=>new Promise(res=>{
+  const fr=new FileReader();
+  fr.onload=e=>{const img=new Image();img.onload=()=>{
+    const r=Math.min(mw/img.width,mw/img.height,1);
+    const c=document.createElement('canvas');c.width=img.width*r;c.height=img.height*r;
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',q));
+  };img.src=e.target.result;};fr.readAsDataURL(file);
+});
+
+/* ══ TRANSLATIONS ═══════════════════════════════════════════════════════════ */
+const T={
+ne:{
+  app:'PasalPro',tag:'Smart Business Manager',
+  login:'लगइन',reg:'दर्ता',email:'इमेल',pass:'पासवर्ड',name:'पूरा नाम',
+  lgBtn:'लगइन',rgBtn:'खाता बनाउनुहोस्',noAcc:'खाता छैन? दर्ता गर्नुहोस्',hasAcc:'खाता छ? लगइन',
+  forgotP:'पासवर्ड बिर्सनुभयो?',resetSent:'रिसेट लिंक पठाइयो ✓',
+  createShop:'नयाँ पसल',joinShop:'पसलमा जोडिनुहोस्',shopName:'पसलको नाम',
+  create:'बनाउनुहोस्',join:'जोडिनुहोस्',
+  dash:'ड्यासबोर्ड',inv:'इन्भेन्ट्री',tx:'कारोबार',party:'पार्टी',rep:'रिपोर्ट',set:'सेटिङ',
+  todaySale:'आजको बिक्री',todayProfit:"नाफा/नोक्सान",toReceive:'पाउनु छ',toPay:'दिनु छ',
+  totalItems:'कुल सामान',lowStock:'कम स्टक',
+  sale:'बिक्री',purch:'खरिद',exp:'खर्च',
+  addTx:'कारोबार थप',amount:'रकम (रु.)',desc:'विवरण',qty:'मात्रा',
+  selProd:'सामान छान्नुहोस्',selParty:'पार्टी छान्नुहोस् (वैकल्पिक)',credit:'उधारो?',
+  addProd:'सामान थप',prodName:'सामानको नाम',cat:'वर्ग',unit:'एकाइ',
+  buyP:'किन्ने मूल्य',sellP:'बेच्ने मूल्य',stock:'स्टक',minStk:'न्यूनतम स्टक',
+  add:'थप',edit:'सम्पादन',del:'हटाउनुहोस्',save:'सेभ',cancel:'रद्द',
+  search:'खोज्नुहोस्...',noData:'डेटा छैन',back:'फिर्ता',
+  customer:'ग्राहक',supplier:'सप्लायर',
+  addParty:'पार्टी थप',partyName:'पार्टीको नाम',phone:'फोन',addr:'ठेगाना',
+  bal:'ब्यालेन्स',addCred:'उधारो थप',addPay:'भुक्तानी',ledger:'खाता',
+  owesYou:'ले दिनु छ',youOwe:'तपाईंले दिनु छ',settled:'बराबर ✓',
+  bills:'बिल',addBill:'बिल थप',noBills:'बिल छैन',billDesc:'विवरण',billAmt:'बिलको रकम',
+  photo:'क्यामेरा',gallery:'ग्यालेरी',
+  darkMode:'डार्क मोड',language:'भाषा',shopCode:'पसल कोड',
+  codeHint:'परिवारसँग शेयर गर्नुहोस् — सबैको डेटा एकै',logout:'लगआउट',langToggle:'English',
+  today:'आज',week:'७ दिन',month:'महिना',all:'सबै',
+  profit:'नाफा',loss:'नोक्सान',totalSales:'जम्मा बिक्री',totalPurch:'जम्मा खरिद',
+  totalExp:'जम्मा खर्च',netProfit:'नेट नाफा',
+  pcs:'पिस',kg:'के.जी.',gm:'ग्रा.',ltr:'लि.',
+  veg:'तरकारी',fruit:'फलफूल',grain:'अन्न',dairy:'दुग्ध',snack:'खाजा',bev:'पेय',other:'अन्य',
+  recentTx:'हालका कारोबार',quickAct:'छिटो काम',viewAll:'सबै हेर्नुहोस्',
+  margin:'मार्जिन',inStock:'स्टक',revenue7:'७ दिनको बिक्री',
+  sendWA:'WhatsApp रिमाइन्डर',waMsg:'नमस्ते',
+  // Admin
+  adminPanel:'Admin Panel',totalShops:'कुल पसल',activeShops:'सक्रिय पसल',totalUsers:'कुल प्रयोगकर्ता',
+  manageShops:'पसल व्यवस्थापन',active:'सक्रिय',suspended:'बन्द',
+  suspend:'बन्द गर्नुहोस्',activate:'सक्रिय गर्नुहोस्',
+  shopDetails:'पसल विवरण',members:'सदस्य',createdOn:'बनाइएको',
+  trialDays:'ट्रायल बाँकी',expired:'म्याद सकियो',
+  v:'v4.0 Premium',
+},
+en:{
+  app:'PasalPro',tag:'Smart Business Manager',
+  login:'Login',reg:'Register',email:'Email',pass:'Password',name:'Full Name',
+  lgBtn:'Login',rgBtn:'Create Account',noAcc:"No account? Register",hasAcc:'Have account? Login',
+  forgotP:'Forgot password?',resetSent:'Reset link sent ✓',
+  createShop:'Create New Shop',joinShop:'Join Existing Shop',shopName:'Shop Name',
+  create:'Create',join:'Join',
+  dash:'Dashboard',inv:'Inventory',tx:'Transactions',party:'Parties',rep:'Reports',set:'Settings',
+  todaySale:"Today's Sales",todayProfit:"Profit/Loss",toReceive:'To Receive',toPay:'To Pay',
+  totalItems:'Total Items',lowStock:'Low Stock',
+  sale:'Sale',purch:'Purchase',exp:'Expense',
+  addTx:'Add Transaction',amount:'Amount (Rs.)',desc:'Description',qty:'Quantity',
+  selProd:'Select Product',selParty:'Select Party (optional)',credit:'Credit?',
+  addProd:'Add Product',prodName:'Product Name',cat:'Category',unit:'Unit',
+  buyP:'Buy Price',sellP:'Sell Price',stock:'Stock',minStk:'Min Stock',
+  add:'Add',edit:'Edit',del:'Delete',save:'Save',cancel:'Cancel',
+  search:'Search...',noData:'No data yet',back:'Back',
+  customer:'Customer',supplier:'Supplier',
+  addParty:'Add Party',partyName:'Party Name',phone:'Phone',addr:'Address',
+  bal:'Balance',addCred:'Add Credit',addPay:'Record Payment',ledger:'Ledger',
+  owesYou:'owes you',youOwe:'you owe',settled:'Settled ✓',
+  bills:'Bills',addBill:'Add Bill',noBills:'No bills yet',billDesc:'Description',billAmt:'Bill Amount',
+  photo:'Camera',gallery:'Gallery',
+  darkMode:'Dark Mode',language:'Language',shopCode:'Shop Code',
+  codeHint:'Share with family — everyone shares same data',logout:'Logout',langToggle:'नेपाली',
+  today:'Today',week:'7 Days',month:'Month',all:'All',
+  profit:'Profit',loss:'Loss',totalSales:'Total Sales',totalPurch:'Total Purchase',
+  totalExp:'Total Expense',netProfit:'Net Profit',
+  pcs:'pcs',kg:'kg',gm:'gm',ltr:'ltr',
+  veg:'Vegetables',fruit:'Fruits',grain:'Grains',dairy:'Dairy',snack:'Snacks',bev:'Beverages',other:'Other',
+  recentTx:'Recent Transactions',quickAct:'Quick Actions',viewAll:'View All',
+  margin:'margin',inStock:'stock',revenue7:'7-Day Revenue',
+  sendWA:'WhatsApp Reminder',waMsg:'Hello',
+  adminPanel:'Admin Panel',totalShops:'Total Shops',activeShops:'Active Shops',totalUsers:'Total Users',
+  manageShops:'Manage Shops',active:'Active',suspended:'Suspended',
+  suspend:'Suspend',activate:'Activate',
+  shopDetails:'Shop Details',members:'Members',createdOn:'Created',
+  trialDays:'Trial Days Left',expired:'Expired',
+  v:'v4.0 Premium',
+}};
+
+/* ══ ICONS ══════════════════════════════════════════════════════════════════ */
+const IP={
+  home:"M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10",
+  box:"M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z M3.27 6.96L12 12.01l8.73-5.05 M12 22.08V12",
+  money:"M12 1v22 M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",
+  users:"M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 11a4 4 0 100-8 4 4 0 000 8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75",
+  chart:"M18 20V10 M12 20V4 M6 20v-6",
+  settings:"M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z",
+  file:"M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8",
+  plus:"M12 5v14 M5 12h14",
+  x:"M18 6L6 18 M6 6l12 12",
+  edit:"M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7 M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z",
+  trash:"M3 6h18 M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2",
+  back:"M15 18l-6-6 6-6",
+  alert:"M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z M12 9v4 M12 17h.01",
+  copy:"M8 17.929H6c-1.105 0-2-.912-2-2.036V5.036C4 3.91 4.895 3 6 3h8c1.105 0 2 .911 2 2.036v1.866m-6 .17h8c1.105 0 2 .91 2 2.035v10.857C20 21.09 19.105 22 18 22h-8c-1.105 0-2-.911-2-2.036V9.107c0-1.124.895-2.036 2-2.036z",
+  logout:"M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4 M16 17l5-5-5-5 M21 12H9",
+  camera:"M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z M12 17a4 4 0 100-8 4 4 0 000 8z",
+  check:"M20 6L9 17l-5-5",
+  right:"M9 18l6-6-6-6",
+  shield:"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+  store:"M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10",
+  wa:"M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z",
+};
+const Ic=({n,s=20,c='currentColor'})=>(
+  <svg width={s} height={s} viewBox="0 0 24 24" fill={n==='wa'?c:'none'} stroke={n==='wa'?'none':c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    {(IP[n]||'').split(' M').map((sg,i)=><path key={i} d={(i>0?'M':'')+sg}/>)}
+  </svg>
+);
+
+/* ══ TOAST ══════════════════════════════════════════════════════════════════ */
+let _t=()=>{};
+const ToastComp=()=>{const[m,sM]=useState('');_t=(msg,d=2200)=>{sM(msg);setTimeout(()=>sM(''),d);};return m?<div className="TST">{m}</div>:null;};
+const toast=m=>_t(m);
+
+/* ══ MODAL ══════════════════════════════════════════════════════════════════ */
+const Modal=({onClose,title,children})=>(
+  <div className="OV" onClick={e=>e.target===e.currentTarget&&onClose()}>
+    <div className="SH SU">
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'20px 20px 16px',borderBottom:'1px solid var(--bdr)'}}>
+        <h3 style={{fontSize:17,fontWeight:800,color:'var(--txt)',margin:0}}>{title}</h3>
+        <button onClick={onClose} style={{width:30,height:30,background:'var(--bg)',border:'none',borderRadius:'50%',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <Ic n="x" s={14} c="var(--sub)"/>
+        </button>
+      </div>
+      <div style={{padding:'18px 20px 24px'}}>{children}</div>
+    </div>
+  </div>
+);
+
+/* ══ SWITCH ═════════════════════════════════════════════════════════════════ */
+const Switch=({on,onChange})=>(
+  <div className="sw" style={{background:on?'var(--p3)':'var(--bdr)'}} onClick={()=>onChange(!on)}>
+    <div className="sw-k" style={{transform:on?'translateX(22px)':'translateX(0)'}}/>
+  </div>
+);
+
+/* ══ LINE CHART ═════════════════════════════════════════════════════════════ */
+const LineChart=({data,color='#4ade80',h=90})=>{
+  if(!data||data.length<2)return(
+    <div style={{height:h,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--sub)',fontSize:13}}>
+      <span>बिक्री डेटा छैन</span>
+    </div>
+  );
+  const max=Math.max(...data.map(d=>d.v),1);
+  const W=300,H=h-20;
+  const pts=data.map((d,i)=>({x:(i/(data.length-1))*W,y:H-(d.v/max)*(H-6)+3}));
+  const line=pts.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  return(
+    <svg viewBox={`0 0 ${W} ${H+20}`} style={{width:'100%',height:h}}>
+      <defs>
+        <linearGradient id="lcg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity=".4"/>
+          <stop offset="100%" stopColor={color} stopOpacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d={`${line} L${W},${H} L0,${H} Z`} fill="url(#lcg)"/>
+      <path d={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      {pts.map((p,i)=>(
+        <g key={i}>
+          <circle cx={p.x} cy={p.y} r="3.5" fill={color} stroke="var(--card)" strokeWidth="2"/>
+          <text x={p.x} y={H+17} textAnchor="middle" fontSize="9.5" fill="var(--sub)" fontWeight="600">{data[i].label}</text>
+        </g>
+      ))}
+    </svg>
+  );
+};
+
+/* ══ SPLASH ═════════════════════════════════════════════════════════════════ */
+const Splash=()=>(
+  <div style={{minHeight:'100vh',background:'linear-gradient(160deg,#052e16 0%,#14532d 50%,#166534 100%)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+    <div style={{textAlign:'center'}}>
+      <div style={{width:96,height:96,background:'rgba(255,255,255,.1)',borderRadius:28,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 20px',border:'1px solid rgba(255,255,255,.18)',backdropFilter:'blur(10px)'}}>
+        <span style={{fontSize:50}}>🏪</span>
+      </div>
+      <div style={{fontSize:34,fontWeight:900,color:'#fff',letterSpacing:-0.5}}>PasalPro</div>
+      <div style={{fontSize:14,color:'rgba(255,255,255,.5)',marginTop:5,fontWeight:500}}>Smart Business Manager</div>
+    </div>
+    <div style={{position:'absolute',bottom:52,display:'flex',gap:8}}>
+      {[0,1,2].map(i=><div key={i} style={{width:7,height:7,borderRadius:'50%',background:'rgba(255,255,255,.35)',animation:`SP ${1+i*.2}s ease ${i*.15}s infinite`}}/>)}
+    </div>
+  </div>
+);
+
+/* ══ AUTH ════════════════════════════════════════════════════════════════════ */
+const Auth=()=>{
+  const[tab,sTab]=useState('login');
+  const[email,sEmail]=useState('');const[pass,sPass]=useState('');const[name,sName]=useState('');
+  const[err,sErr]=useState('');const[busy,sBusy]=useState(false);const[lang,sLang]=useState('ne');const[fgt,sFgt]=useState(false);
+  const t=T[lang];
+  const go=async()=>{
+    sErr('');sBusy(true);
+    try{
+      if(tab==='login'){await auth.signInWithEmailAndPassword(email.trim(),pass);}
+      else{
+        if(!name.trim()){sErr('नाम आवश्यक');sBusy(false);return;}
+        if(pass.length<6){sErr('पासवर्ड कम्तिमा ६ अक्षर');sBusy(false);return;}
+        const cr=await auth.createUserWithEmailAndPassword(email.trim(),pass);
+        await db.ref(`users/${cr.user.uid}`).set({name:name.trim(),email:email.trim(),createdAt:now()});
+      }
+    }catch(e){
+      const em=e.code;
+      sErr(['auth/user-not-found','auth/wrong-password','auth/invalid-credential'].includes(em)?'इमेल वा पासवर्ड गलत':
+        em==='auth/email-already-in-use'?'यो इमेल पहिले दर्ता भएको':em==='auth/invalid-email'?'इमेल गलत':
+        em==='auth/too-many-requests'?'धेरै प्रयास, केहि बेर पछि':'गलत भयो, फेरि प्रयास गर्नुहोस्');
+    }
+    sBusy(false);
+  };
+  const doReset=async()=>{
+    if(!email.trim()){sErr('इमेल लेख्नुहोस्');return;}
+    try{await auth.sendPasswordResetEmail(email.trim());sFgt(false);toast(t.resetSent);}
+    catch{sErr('इमेल फेला परेन');}
+  };
+  return(
+    <div style={{minHeight:'100vh',background:'linear-gradient(165deg,#052e16 0%,#14532d 45%,#166534 80%,#22c55e 130%)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:16}}>
+      <div style={{width:'100%',maxWidth:380}}>
+        {/* Logo */}
+        <div style={{textAlign:'center',marginBottom:30}}>
+          <div style={{width:84,height:84,background:'rgba(255,255,255,.12)',borderRadius:24,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px',border:'1px solid rgba(255,255,255,.2)',backdropFilter:'blur(8px)'}}>
+            <span style={{fontSize:42}}>🏪</span>
+          </div>
+          <div style={{fontSize:32,fontWeight:900,color:'#fff',letterSpacing:-.5}}>PasalPro</div>
+          <div style={{fontSize:14,color:'rgba(255,255,255,.5)',marginTop:4}}>{t.tag}</div>
+        </div>
+        {/* Lang */}
+        <div style={{display:'flex',justifyContent:'center',marginBottom:18}}>
+          <button onClick={()=>sLang(lang==='ne'?'en':'ne')} style={{background:'rgba(255,255,255,.12)',border:'1px solid rgba(255,255,255,.22)',borderRadius:40,padding:'6px 20px',color:'#fff',fontSize:13,fontWeight:600,cursor:'pointer'}}>
+            {t.langToggle}
+          </button>
+        </div>
+        {/* Card */}
+        <div style={{background:'var(--card)',borderRadius:28,overflow:'hidden',boxShadow:'0 32px 80px rgba(0,0,0,.35)'}}>
+          <div style={{display:'flex',background:'var(--bg)'}}>
+            {['login','reg'].map(tp=>(
+              <button key={tp} onClick={()=>{sTab(tp);sErr('');}} style={{flex:1,padding:'15px 0',fontWeight:700,fontSize:14,cursor:'pointer',border:'none',background:'transparent',color:tab===tp?'var(--p3)':'var(--sub)',borderBottom:`3px solid ${tab===tp?'var(--p3)':'transparent'}`,transition:'all .2s'}}>
+                {tp==='login'?t.login:t.reg}
+              </button>
+            ))}
+          </div>
+          <div style={{padding:'22px 22px 26px',display:'flex',flexDirection:'column',gap:12}}>
+            {tab==='reg'&&<input value={name} onChange={e=>sName(e.target.value)} placeholder={t.name} className="inp"/>}
+            <input value={email} onChange={e=>sEmail(e.target.value)} placeholder={t.email} type="email" className="inp"/>
+            <input value={pass} onChange={e=>sPass(e.target.value)} placeholder={t.pass} type="password" className="inp" onKeyDown={e=>e.key==='Enter'&&go()}/>
+            {err&&<div style={{background:'#fee2e2',color:'#b91c1c',borderRadius:12,padding:'10px 14px',fontSize:13,fontWeight:600}}>{err}</div>}
+            <button onClick={go} disabled={busy} className="btn Bp" style={{marginTop:2}}>
+              {busy?<div className="SP"/>:tab==='login'?t.lgBtn:t.rgBtn}
+            </button>
+            {tab==='login'&&<button onClick={()=>sFgt(true)} style={{background:'none',border:'none',color:'var(--p3)',fontSize:13,fontWeight:600,cursor:'pointer',textAlign:'center'}}>{t.forgotP}</button>}
+            <p onClick={()=>{sTab(tab==='login'?'reg':'login');sErr('');}} style={{textAlign:'center',fontSize:13,color:'var(--p3)',fontWeight:600,cursor:'pointer',margin:0}}>
+              {tab==='login'?t.noAcc:t.hasAcc}
+            </p>
+          </div>
+        </div>
+      </div>
+      {fgt&&<Modal onClose={()=>sFgt(false)} title="पासवर्ड रिसेट">
+        <p style={{fontSize:14,color:'var(--sub)',marginBottom:14}}>तपाईंको इमेलमा रिसेट लिंक पठाइनेछ।</p>
+        <input value={email} onChange={e=>sEmail(e.target.value)} placeholder={t.email} type="email" className="inp" style={{marginBottom:14}}/>
+        <button onClick={doReset} className="btn Bp">पठाउनुहोस्</button>
+      </Modal>}
+    </div>
+  );
+};
+
+/* ══ SHOP SETUP ═════════════════════════════════════════════════════════════ */
+const ShopSetup=({user,onDone,lang})=>{
+  const[mode,sMode]=useState(null);const[sName,sSName]=useState('');const[code,sCode]=useState('');const[err,sErr]=useState('');const[busy,sBusy]=useState(false);
+  const t=T[lang];
+  const create=async()=>{
+    if(!sName.trim())return sErr('नाम आवश्यक');sBusy(true);sErr('');
+    try{
+      const c=genCode();const r=db.ref('shops').push();
+      await r.set({name:sName.trim(),code:c,ownerId:user.uid,members:{[user.uid]:true},status:'active',plan:'trial',trialStart:now(),createdAt:now()});
+      await db.ref(`users/${user.uid}/shopId`).set(r.key);
+      onDone(r.key);
+    }catch(e){sErr(e.message);}sBusy(false);
+  };
+  const join=async()=>{
+    if(!code.trim())return sErr('कोड आवश्यक');sBusy(true);sErr('');
+    try{
+      const snap=await db.ref('shops').orderByChild('code').equalTo(code.trim().toUpperCase()).once('value');
+      if(!snap.exists()){sErr('पसल फेला परेन');sBusy(false);return;}
+      const k=Object.keys(snap.val())[0];
+      const shop=snap.val()[k];
+      if(shop.status==='suspended'){sErr('यो पसल निलम्बित छ। Admin लाई सम्पर्क गर्नुहोस्।');sBusy(false);return;}
+      await db.ref(`shops/${k}/members/${user.uid}`).set(true);
+      await db.ref(`users/${user.uid}/shopId`).set(k);
+      onDone(k);
+    }catch(e){sErr(e.message);}sBusy(false);
+  };
+  return(
+    <div style={{minHeight:'100vh',background:'linear-gradient(160deg,#052e16,#166534)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:16}}>
+      <div style={{width:'100%',maxWidth:380}}>
+        <div style={{textAlign:'center',marginBottom:24}}><span style={{fontSize:56}}>🏪</span><div style={{fontSize:24,fontWeight:800,color:'#fff',marginTop:10}}>{!mode?'पसल सेटअप':mode==='create'?t.createShop:t.joinShop}</div></div>
+        <div style={{background:'var(--card)',borderRadius:26,padding:24,boxShadow:'0 30px 80px rgba(0,0,0,.35)'}}>
+          {!mode?(<div style={{display:'flex',flexDirection:'column',gap:12}}>
+            <button onClick={()=>sMode('create')} className="btn Bp" style={{fontSize:16,padding:'16px'}}><span style={{fontSize:24}}>✨</span>{t.createShop}</button>
+            <button onClick={()=>sMode('join')} className="btn Bo" style={{fontSize:16,padding:'16px'}}><span style={{fontSize:24}}>🔗</span>{t.joinShop}</button>
+          </div>):mode==='create'?(<div style={{display:'flex',flexDirection:'column',gap:12}}>
+            <input value={sName} onChange={e=>sSName(e.target.value)} placeholder={t.shopName} className="inp" onKeyDown={e=>e.key==='Enter'&&create()}/>
+            {err&&<p style={{color:'var(--red)',fontSize:13,margin:0}}>{err}</p>}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}><button onClick={()=>sMode(null)} className="btn Bo">{t.cancel}</button><button onClick={create} disabled={busy} className="btn Bp">{busy?'...':t.create}</button></div>
+          </div>):(<div style={{display:'flex',flexDirection:'column',gap:12}}>
+            <p style={{fontSize:14,color:'var(--sub)',textAlign:'center',margin:0}}>६ अक्षरको पसल कोड लेख्नुहोस्</p>
+            <input value={code} onChange={e=>sCode(e.target.value.toUpperCase())} placeholder="XXXXXX" className="inp" style={{textAlign:'center',fontSize:26,fontWeight:900,letterSpacing:8}} maxLength={6}/>
+            {err&&<p style={{color:'var(--red)',fontSize:13,margin:0,textAlign:'center'}}>{err}</p>}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}><button onClick={()=>sMode(null)} className="btn Bo">{t.cancel}</button><button onClick={join} disabled={busy} className="btn Bp">{busy?'...':t.join}</button></div>
+          </div>)}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ══ SUSPENDED SCREEN ═══════════════════════════════════════════════════════ */
+const SuspendedScreen=({onLogout})=>(
+  <div style={{minHeight:'100vh',background:'var(--bg)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24,textAlign:'center'}}>
+    <div style={{fontSize:60,marginBottom:16}}>🔒</div>
+    <h2 style={{fontSize:22,fontWeight:800,color:'var(--txt)',margin:'0 0 8px'}}>पसल निलम्बित</h2>
+    <p style={{fontSize:15,color:'var(--sub)',margin:'0 0 24px',lineHeight:1.6}}>तपाईंको पसल Admin द्वारा निलम्बित गरिएको छ।<br/>कृपया Admin सँग सम्पर्क गर्नुहोस्।</p>
+    <button onClick={onLogout} className="btn Bo" style={{width:'auto',padding:'12px 28px'}}>लगआउट</button>
+  </div>
+);
+
+/* ══ TX MODAL ════════════════════════════════════════════════════════════════ */
+const TxModal=({shopId,t,onClose,defaultType='sale'})=>{
+  const[prods,sProds]=useState([]);const[parties,sParties]=useState([]);
+  const[f,sF]=useState({type:defaultType,amount:'',desc:'',prodId:'',qty:'1',partyId:'',isCredit:false});
+  const[busy,sBusy]=useState(false);
+  useEffect(()=>{
+    db.ref(`shops/${shopId}/inventory`).once('value',s=>sProds(oa(s.val()).sort((a,b)=>(a.name||'').localeCompare(b.name||''))));
+    db.ref(`shops/${shopId}/parties`).once('value',s=>sParties(oa(s.val()).sort((a,b)=>(a.name||'').localeCompare(b.name||''))));
+  },[shopId]);
+  const save=async()=>{
+    const amt=parseFloat(f.amount);if(!amt||amt<=0)return;
+    sBusy(true);const qty=parseFloat(f.qty)||1;
+    await db.ref(`shops/${shopId}/transactions`).push({type:f.type,amount:amt,description:f.desc||t[f.type],productId:f.prodId||null,quantity:qty,partyId:(f.isCredit&&f.partyId)?f.partyId:null,createdAt:now()});
+    if(f.prodId){const delta=f.type==='sale'?-qty:f.type==='purch'?qty:0;if(delta!==0){const sn=await db.ref(`shops/${shopId}/inventory/${f.prodId}/stock`).once('value');await db.ref(`shops/${shopId}/inventory/${f.prodId}/stock`).set((sn.val()||0)+delta);}}
+    if(f.isCredit&&f.partyId){
+      const sn=await db.ref(`shops/${shopId}/parties/${f.partyId}/balance`).once('value');
+      const cur=sn.val()||0;const delta2=f.type==='sale'?amt:-amt;
+      await db.ref(`shops/${shopId}/parties/${f.partyId}/balance`).set(cur+delta2);
+      await db.ref(`shops/${shopId}/ledger`).push({partyId:f.partyId,type:f.type==='sale'?'receivable':'payable',amount:amt,description:f.desc||t[f.type],createdAt:now()});
+    }
+    toast(f.type==='sale'?'बिक्री थपियो ✓':f.type==='purch'?'खरिद थपियो ✓':'खर्च थपियो ✓');
+    sBusy(false);onClose();
+  };
+  const TC={sale:{b:'#dcfce7',c:'var(--p3)'},purch:{b:'#dbeafe',c:'var(--blue)'},exp:{b:'#fee2e2',c:'var(--red)'}};
+  return(
+    <Modal onClose={onClose} title={t.addTx}>
+      <div style={{display:'flex',gap:8,marginBottom:16}}>
+        {[['sale',t.sale],['purch',t.purch],['exp',t.exp]].map(([tp,lb])=>{
+          const a=f.type===tp,tc=TC[tp];
+          return<button key={tp} onClick={()=>sF({...f,type:tp})} style={{flex:1,padding:'11px 4px',borderRadius:12,border:`2px solid ${a?tc.c:'var(--bdr)'}`,fontWeight:700,fontSize:13,cursor:'pointer',background:a?tc.b:'transparent',color:a?tc.c:'var(--sub)',transition:'all .15s'}}>{lb}</button>;
+        })}
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:12}}>
+        <input value={f.amount} onChange={e=>sF({...f,amount:e.target.value})} type="number" placeholder={t.amount} className="inp"/>
+        <input value={f.desc} onChange={e=>sF({...f,desc:e.target.value})} placeholder={t.desc} className="inp"/>
+        <select value={f.prodId} onChange={e=>{const p=prods.find(x=>x.id===e.target.value);sF({...f,prodId:e.target.value,amount:p&&!f.amount?String(p.sellP||p.sell||0):f.amount,desc:p&&!f.desc?p.name:f.desc});}} className="inp">
+          <option value="">{t.selProd}</option>
+          {prods.map(p=><option key={p.id} value={p.id}>{p.name} ({p.stock||0})</option>)}
+        </select>
+        {f.prodId&&<input value={f.qty} onChange={e=>{const q=parseFloat(e.target.value)||1;const p=prods.find(x=>x.id===f.prodId);sF({...f,qty:e.target.value,amount:p?String((p.sellP||p.sell||0)*q):f.amount});}} type="number" placeholder={t.qty} min="1" className="inp"/>}
+        {(f.type==='sale'||f.type==='purch')&&<>
+          <label style={{display:'flex',alignItems:'center',gap:12,cursor:'pointer'}}>
+            <Switch on={f.isCredit} onChange={v=>sF({...f,isCredit:v})}/>
+            <span style={{fontSize:14,fontWeight:600,color:'var(--txt)'}}>{t.credit} (उधारो / पछि भुक्तानी)</span>
+          </label>
+          {f.isCredit&&<select value={f.partyId} onChange={e=>sF({...f,partyId:e.target.value})} className="inp">
+            <option value="">{t.selParty}</option>
+            {parties.map(p=><option key={p.id} value={p.id}>{p.name}{p.balance?` — ${fmt(Math.abs(p.balance))}`:''}</option>)}
+          </select>}
+        </>}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:20}}>
+        <button onClick={onClose} className="btn Bo">{t.cancel}</button>
+        <button onClick={save} disabled={busy} className="btn Bp">{busy?'...':t.save}</button>
+      </div>
+    </Modal>
+  );
+};
+
+/* ══ DASHBOARD ══════════════════════════════════════════════════════════════ */
+const Dashboard=({shopId,shopData,t,setPage,setQTx,lang,sLang,dark,sDark,onLogout})=>{
+  const[txs,sTxs]=useState([]);const[inv,sInv]=useState([]);const[parties,sParties]=useState([]);
+  useEffect(()=>{
+    const r1=db.ref(`shops/${shopId}/transactions`);
+    r1.on('value',s=>sTxs(oa(s.val()).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))));
+    const r2=db.ref(`shops/${shopId}/inventory`);r2.on('value',s=>sInv(oa(s.val())));
+    const r3=db.ref(`shops/${shopId}/parties`);r3.on('value',s=>sParties(oa(s.val())));
+    return()=>{r1.off();r2.off();r3.off();};
+  },[shopId]);
+
+  const tSale=txs.filter(x=>x.type==='sale'&&isToday(x.createdAt)).reduce((s,x)=>s+(x.amount||0),0);
+  const tPurch=txs.filter(x=>x.type==='purch'&&isToday(x.createdAt)).reduce((s,x)=>s+(x.amount||0),0);
+  const tExp=txs.filter(x=>x.type==='exp'&&isToday(x.createdAt)).reduce((s,x)=>s+(x.amount||0),0);
+  const netProfit=tSale-tPurch-tExp;
+  const toRec=parties.reduce((s,p)=>s+((p.balance||0)>0?p.balance:0),0);
+  const toPay=parties.reduce((s,p)=>s+((p.balance||0)<0?Math.abs(p.balance):0),0);
+  const lowCount=inv.filter(p=>(p.stock||0)<=(p.minStk||0)).length;
+
+  const chartData=useMemo(()=>{
+    const days=[];
+    for(let i=6;i>=0;i--){
+      const d=new Date();d.setDate(d.getDate()-i);
+      const v=txs.filter(x=>x.type==='sale'&&x.createdAt&&new Date(x.createdAt).toDateString()===d.toDateString()).reduce((s,x)=>s+(x.amount||0),0);
+      days.push({label:dayL(d.getDay()),v});
+    }
+    return days;
+  },[txs]);
+
+  const quickBtns=[
+    {icon:'💰',label:t.sale,color:'#15803d',bg:'#dcfce7',action:()=>setQTx('sale')},
+    {icon:'📦',label:t.purch,color:'#1d4ed8',bg:'#dbeafe',action:()=>setQTx('purch')},
+    {icon:'💸',label:t.exp,color:'#b91c1c',bg:'#fee2e2',action:()=>setQTx('exp')},
+    {icon:'👤',label:t.addParty,color:'#6d28d9',bg:'#ede9fe',action:()=>setPage('party')},
+  ];
+
+  return(
+    <div className="S FI" style={{height:'100%',paddingBottom:76}}>
+      {/* HEADER */}
+      <div style={{background:'linear-gradient(160deg,#052e16 0%,#14532d 55%,#166534 100%)',padding:'48px 18px 22px',position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:-70,right:-70,width:220,height:220,background:'rgba(255,255,255,.03)',borderRadius:'50%'}}/>
+        <div style={{position:'absolute',bottom:-90,left:-50,width:240,height:240,background:'rgba(255,255,255,.03)',borderRadius:'50%'}}/>
+
+        {/* Top bar */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20,position:'relative'}}>
+          <div>
+            <p style={{fontSize:11,color:'rgba(255,255,255,.4)',margin:0,fontWeight:600,textTransform:'uppercase',letterSpacing:.7}}>🌿 नमस्ते</p>
+            <h1 style={{fontSize:21,fontWeight:900,color:'#fff',margin:'3px 0 0',letterSpacing:-.3}}>{shopData?.name||'PasalPro'}</h1>
+          </div>
+          <div style={{display:'flex',gap:9}}>
+            <button onClick={()=>sLang(lang==='ne'?'en':'ne')} style={{background:'rgba(255,255,255,.1)',border:'1px solid rgba(255,255,255,.18)',borderRadius:20,padding:'5px 12px',color:'#fff',fontSize:12,fontWeight:600,cursor:'pointer'}}>{t.langToggle}</button>
+            <button onClick={()=>sDark(!dark)} style={{width:34,height:34,background:'rgba(255,255,255,.1)',border:'1px solid rgba(255,255,255,.15)',borderRadius:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}}>{dark?'☀️':'🌙'}</button>
+          </div>
+        </div>
+
+        {/* Hero stats */}
+        <div style={{background:'rgba(255,255,255,.09)',borderRadius:22,padding:'18px 20px',border:'1px solid rgba(255,255,255,.13)',backdropFilter:'blur(12px)',cursor:'pointer'}} onClick={()=>setPage('rep')}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+            <div>
+              <p style={{fontSize:12,color:'rgba(255,255,255,.5)',margin:'0 0 5px',fontWeight:500}}>{t.todayProfit} — आज</p>
+              <p style={{fontSize:36,fontWeight:900,color:'#fff',margin:'0 0 8px',lineHeight:1}}>{fmts(Math.abs(netProfit))}</p>
+              <span style={{display:'inline-block',background:netProfit>=0?'rgba(74,222,128,.2)':'rgba(248,113,113,.2)',color:netProfit>=0?'#4ade80':'#f87171',fontSize:12,fontWeight:700,padding:'4px 14px',borderRadius:20}}>
+                {netProfit>=0?`📈 ${t.profit}`:`📉 ${t.loss}`}
+              </span>
+            </div>
+            <div style={{textAlign:'right'}}>
+              <p style={{fontSize:11,color:'rgba(255,255,255,.4)',margin:'0 0 2px',fontWeight:500}}>बिक्री</p>
+              <p style={{fontSize:18,fontWeight:800,color:'#4ade80',margin:'0 0 10px'}}>{fmts(tSale)}</p>
+              <p style={{fontSize:11,color:'rgba(255,255,255,.4)',margin:'0 0 2px',fontWeight:500}}>खर्च</p>
+              <p style={{fontSize:16,fontWeight:700,color:'#f87171',margin:0}}>{fmts(tPurch+tExp)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{padding:'16px 16px 0'}}>
+        {/* Quick Actions */}
+        <p style={{fontSize:11,fontWeight:700,color:'var(--sub)',margin:'0 0 10px',textTransform:'uppercase',letterSpacing:.6}}>{t.quickAct}</p>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:18}}>
+          {quickBtns.map((b,i)=>(
+            <button key={i} onClick={b.action} style={{background:b.bg,border:`1.5px solid ${b.color}22`,borderRadius:18,padding:'13px 4px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:6,transition:'transform .12s'}}
+              onTouchStart={e=>e.currentTarget.style.transform='scale(.9)'}
+              onTouchEnd={e=>e.currentTarget.style.transform='scale(1)'}>
+              <span style={{fontSize:24}}>{b.icon}</span>
+              <span style={{fontSize:10,fontWeight:700,color:b.color,textAlign:'center',lineHeight:1.2}}>{b.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Stats grid */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
+          {[
+            {l:t.todaySale,v:fmts(tSale),icon:'💰',c:'#15803d',bg:'linear-gradient(135deg,#166534,#16a34a)',onClick:()=>setPage('tx'),big:true},
+            {l:t.todayProfit,v:fmts(Math.abs(netProfit)),sub:netProfit>=0?t.profit:t.loss,icon:netProfit>=0?'📈':'📉',c:netProfit>=0?'#059669':'#dc2626',bg:netProfit>=0?'linear-gradient(135deg,#065f46,#059669)':'linear-gradient(135deg,#7f1d1d,#dc2626)',onClick:()=>setPage('rep'),big:true},
+            {l:t.toReceive,v:fmts(toRec),icon:'👆',c:'#6d28d9',bg:'#ede9fe',onClick:()=>setPage('party')},
+            {l:t.toPay,v:fmts(toPay),icon:'👇',c:'#b45309',bg:'#fef3c7',onClick:()=>setPage('party')},
+            {l:t.totalItems,v:inv.length,icon:'📦',c:'#1d4ed8',bg:'#dbeafe',onClick:()=>setPage('inv')},
+            {l:t.lowStock,v:lowCount,icon:'⚠️',c:'#b91c1c',bg:'#fee2e2',onClick:()=>setPage('inv'),highlight:lowCount>0},
+          ].map((s,i)=>(
+            <button key={i} onClick={s.onClick} style={{background:s.bg,border:s.big?'none':'1px solid var(--bdr)',borderRadius:20,padding:s.big?'16px':'14px 14px',cursor:'pointer',textAlign:'left',boxShadow:s.big?'0 6px 24px rgba(0,0,0,.2)':'var(--sh)',transition:'transform .13s',display:'flex',flexDirection:'column',gap:4}}
+              onTouchStart={e=>e.currentTarget.style.transform='scale(.95)'}
+              onTouchEnd={e=>e.currentTarget.style.transform='scale(1)'}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+                <span style={{fontSize:22}}>{s.icon}</span>
+                {s.sub&&<span style={{fontSize:10,fontWeight:700,background:'rgba(255,255,255,.2)',color:'#fff',padding:'2px 8px',borderRadius:20}}>{s.sub}</span>}
+              </div>
+              <p style={{fontSize:s.big?19:17,fontWeight:900,color:s.big?'#fff':s.c,margin:'4px 0 0',lineHeight:1}}>{s.v}</p>
+              <p style={{fontSize:11,fontWeight:500,color:s.big?'rgba(255,255,255,.65)':'var(--sub)',margin:0}}>{s.l}</p>
+            </button>
+          ))}
+        </div>
+
+        {/* 7-day chart */}
+        <div className="cd" style={{marginBottom:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <p style={{fontSize:14,fontWeight:700,color:'var(--txt)',margin:0}}>📈 {t.revenue7}</p>
+            <button onClick={()=>setPage('rep')} style={{background:'none',border:'none',color:'var(--p3)',fontSize:12,fontWeight:700,cursor:'pointer'}}>{t.viewAll}</button>
+          </div>
+          <LineChart data={chartData} color="var(--p4)" h={95}/>
+        </div>
+
+        {/* Udhaaro banner */}
+        {toRec>0&&<button onClick={()=>setPage('party')} style={{width:'100%',background:'linear-gradient(135deg,#4c1d95,#7c3aed)',border:'none',borderRadius:20,padding:'16px 18px',cursor:'pointer',marginBottom:16,display:'flex',justifyContent:'space-between',alignItems:'center',boxShadow:'0 6px 24px rgba(124,58,237,.35)'}}>
+          <div style={{textAlign:'left'}}>
+            <p style={{fontSize:12,color:'rgba(255,255,255,.6)',margin:'0 0 3px',fontWeight:500}}>उधारो — लिनु बाँकी</p>
+            <p style={{fontSize:24,fontWeight:900,color:'#fff',margin:0}}>{fmt(toRec)}</p>
+          </div>
+          <Ic n="right" s={20} c="rgba(255,255,255,.7)"/>
+        </button>}
+
+        {/* Low stock */}
+        {lowCount>0&&<button onClick={()=>setPage('inv')} style={{width:'100%',background:'#fffbeb',border:'2px solid #fbbf24',borderRadius:18,padding:'13px 16px',cursor:'pointer',marginBottom:16,display:'flex',alignItems:'center',gap:12,textAlign:'left'}}>
+          <div style={{width:38,height:38,background:'#f59e0b',borderRadius:13,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}><Ic n="alert" s={19} c="#fff"/></div>
+          <div><p style={{fontSize:14,fontWeight:700,color:'#92400e',margin:'0 0 1px'}}>{lowCount} सामानको स्टक कम छ</p><p style={{fontSize:12,color:'#b45309',margin:0}}>थप गर्न ट्याप गर्नुहोस्</p></div>
+        </button>}
+
+        {/* Recent Txs */}
+        <div style={{marginBottom:16}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+            <p style={{fontSize:14,fontWeight:700,color:'var(--txt)',margin:0}}>🕐 {t.recentTx}</p>
+            <button onClick={()=>setPage('tx')} style={{background:'none',border:'none',color:'var(--p3)',fontSize:12,fontWeight:700,cursor:'pointer'}}>{t.viewAll}</button>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {txs.slice(0,7).map(tx=>{
+              const tc={sale:{bg:'#dcfce7',icon:'💰',c:'#15803d'},purch:{bg:'#dbeafe',icon:'📦',c:'#1d4ed8'},exp:{bg:'#fee2e2',icon:'💸',c:'#b91c1c'}};
+              const s=tc[tx.type]||tc.exp;
+              return(
+                <div key={tx.id} className="cd" style={{padding:'12px 14px',display:'flex',gap:12,alignItems:'center'}}>
+                  <div style={{width:40,height:40,borderRadius:14,background:s.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>{s.icon}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <p style={{fontSize:14,fontWeight:600,color:'var(--txt)',margin:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{tx.description}</p>
+                    <p style={{fontSize:11,color:'var(--sub)',margin:'2px 0 0'}}>{fmtD(tx.createdAt)} · {fmtT(tx.createdAt)}</p>
+                  </div>
+                  <p style={{fontSize:14,fontWeight:800,color:tx.type==='sale'?'#16a34a':'#dc2626',margin:0,flexShrink:0}}>
+                    {tx.type==='sale'?'+':'-'}{fmts(tx.amount)}
+                  </p>
+                </div>
+              );
+            })}
+            {txs.length===0&&<div className="cd" style={{textAlign:'center',padding:'40px 0',color:'var(--sub)'}}><div style={{fontSize:44,marginBottom:10}}>📊</div><p style={{fontSize:14,margin:0}}>{t.noData}</p></div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ══ INVENTORY ══════════════════════════════════════════════════════════════ */
+const Inventory=({shopId,t})=>{
+  const[items,sItems]=useState([]);const[q,sQ]=useState('');const[catF,sCatF]=useState('all');const[modal,sModal]=useState(false);const[editing,sEditing]=useState(null);const[busy,sBusy]=useState(false);
+  const blank={name:'',cat:'other',unit:'pcs',buyP:'',sellP:'',stock:'',minStk:'5'};const[f,sF]=useState(blank);
+  useEffect(()=>{const r=db.ref(`shops/${shopId}/inventory`);r.on('value',s=>sItems(oa(s.val()).sort((a,b)=>(a.name||'').localeCompare(b.name||''))));return()=>r.off();},[shopId]);
+  const cats=['all','veg','fruit','grain','dairy','snack','bev','other'];
+  const CE={veg:'🥬',fruit:'🍎',grain:'🌾',dairy:'🥛',snack:'🍪',bev:'🧃',other:'📦',all:'🏪'};
+  const filtered=items.filter(p=>(p.name||'').toLowerCase().includes(q.toLowerCase())&&(catF==='all'||p.cat===catF));
+  const openAdd=()=>{sF(blank);sEditing(null);sModal(true);};
+  const openEdit=p=>{sF({name:p.name||'',cat:p.cat||'other',unit:p.unit||'pcs',buyP:String(p.buyP||p.buy||''),sellP:String(p.sellP||p.sell||''),stock:String(p.stock||''),minStk:String(p.minStk||'5')});sEditing(p);sModal(true);};
+  const save=async()=>{
+    if(!f.name.trim())return;sBusy(true);
+    const d={name:f.name.trim(),cat:f.cat,unit:f.unit,buyP:parseFloat(f.buyP)||0,sellP:parseFloat(f.sellP)||0,stock:parseFloat(f.stock)||0,minStk:parseFloat(f.minStk)||5,updatedAt:now()};
+    if(editing)await db.ref(`shops/${shopId}/inventory/${editing.id}`).update(d);
+    else await db.ref(`shops/${shopId}/inventory`).push({...d,createdAt:now()});
+    toast(editing?'अपडेट ✓':'थपियो ✓');sBusy(false);sModal(false);
+  };
+  const del=async id=>{if(window.confirm('हटाउने?')){await db.ref(`shops/${shopId}/inventory/${id}`).remove();toast('हटाइयो');}};
+  const margin=p=>{const bp=p.buyP||p.buy||0,sp=p.sellP||p.sell||0;return sp>0?Math.round(((sp-bp)/sp)*100):0;};
+
+  return(
+    <div className="FI" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div style={{padding:'48px 16px 12px',background:'var(--card)',borderBottom:'1px solid var(--bdr)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+          <h1 style={{fontSize:22,fontWeight:800,color:'var(--txt)',margin:0}}>📦 {t.inv}</h1>
+          <button onClick={openAdd} style={{background:'var(--p3)',border:'none',borderRadius:14,padding:'9px 18px',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6}}><Ic n="plus" s={14} c="#fff"/> {t.add}</button>
+        </div>
+        <input value={q} onChange={e=>sQ(e.target.value)} placeholder={t.search} className="inp" style={{marginBottom:10}}/>
+        <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:2}}>
+          {cats.map(c=><button key={c} onClick={()=>sCatF(c)} className="pil" style={{borderColor:catF===c?'var(--p3)':'var(--bdr)',background:catF===c?'var(--p3)':'transparent',color:catF===c?'#fff':'var(--sub)'}}>{CE[c]} {c==='all'?'সবै':t[c]||c}</button>)}
+        </div>
+      </div>
+      <div className="S" style={{flex:1,padding:'12px 14px',paddingBottom:80}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:14}}>
+          {[{l:'कुल',v:items.length,c:'var(--p3)'},{l:'कम स्टक',v:items.filter(p=>(p.stock||0)<=(p.minStk||0)).length,c:'var(--red)'},{l:'कुल मूल्य',v:fmts(items.reduce((s,p)=>s+(p.stock||0)*(p.sellP||p.sell||0),0)),c:'var(--blue)'}].map((s,i)=>(
+            <div key={i} style={{background:'var(--card)',border:'1px solid var(--bdr)',borderRadius:14,padding:'10px',textAlign:'center',boxShadow:'var(--sh)'}}>
+              <p style={{fontSize:15,fontWeight:800,color:s.c,margin:0}}>{s.v}</p>
+              <p style={{fontSize:10,color:'var(--sub)',margin:'2px 0 0',fontWeight:500}}>{s.l}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:9}}>
+          {filtered.map(p=>{
+            const low=(p.stock||0)<=(p.minStk||0);const m=margin(p);
+            return(
+              <div key={p.id} className="cd" style={{borderLeft:`4px solid ${low?'var(--red)':(p.stock||0)<=((p.minStk||0)*2)?'var(--amber)':'var(--p3)'}`,padding:'13px 14px'}}>
+                <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+                  <div style={{width:44,height:44,borderRadius:14,background:low?'#fee2e2':'var(--pl)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>{CE[p.cat]||'📦'}</div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:'flex',alignItems:'center',gap:7,flexWrap:'wrap',marginBottom:4}}>
+                      <p style={{fontSize:15,fontWeight:700,color:'var(--txt)',margin:0}}>{p.name}</p>
+                      <span className="bdg" style={{background:low?'#fee2e2':'#dcfce7',color:low?'#b91c1c':'#15803d'}}>{p.stock||0} {t[p.unit]||p.unit}</span>
+                      {m>0&&<span className="bdg" style={{background:'#dbeafe',color:'#1d4ed8'}}>{m}% {t.margin}</span>}
+                    </div>
+                    <div style={{display:'flex',gap:16}}>
+                      <span style={{fontSize:12,color:'var(--sub)'}}>किन्ने: <b style={{color:'var(--txt)'}}>{fmt(p.buyP||p.buy||0)}</b></span>
+                      <span style={{fontSize:12,color:'var(--sub)'}}>बेच्ने: <b style={{color:'var(--p3)'}}>{fmt(p.sellP||p.sell||0)}</b></span>
+                    </div>
+                  </div>
+                  <div style={{display:'flex',gap:7,flexShrink:0}}>
+                    <button onClick={()=>openEdit(p)} style={{width:30,height:30,background:'#dbeafe',border:'none',borderRadius:10,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}><Ic n="edit" s={13} c="#2563eb"/></button>
+                    <button onClick={()=>del(p.id)} style={{width:30,height:30,background:'#fee2e2',border:'none',borderRadius:10,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}><Ic n="trash" s={13} c="#dc2626"/></button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {filtered.length===0&&<div style={{textAlign:'center',padding:'52px 0',color:'var(--sub)'}}><div style={{fontSize:52,marginBottom:12}}>📦</div><p style={{fontSize:15,margin:0}}>{t.noData}</p></div>}
+        </div>
+      </div>
+      {modal&&<Modal onClose={()=>sModal(false)} title={editing?t.edit:t.addProd}>
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          <input value={f.name} onChange={e=>sF({...f,name:e.target.value})} placeholder={t.prodName} className="inp"/>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            <select value={f.cat} onChange={e=>sF({...f,cat:e.target.value})} className="inp">{['veg','fruit','grain','dairy','snack','bev','other'].map(c=><option key={c} value={c}>{CE[c]} {t[c]||c}</option>)}</select>
+            <select value={f.unit} onChange={e=>sF({...f,unit:e.target.value})} className="inp">{['pcs','kg','gm','ltr'].map(u=><option key={u} value={u}>{t[u]}</option>)}</select>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            <div><label style={{fontSize:12,color:'var(--sub)',fontWeight:600,display:'block',marginBottom:4}}>{t.buyP}</label><input value={f.buyP} onChange={e=>sF({...f,buyP:e.target.value})} type="number" placeholder="0" className="inp"/></div>
+            <div><label style={{fontSize:12,color:'var(--sub)',fontWeight:600,display:'block',marginBottom:4}}>{t.sellP}</label><input value={f.sellP} onChange={e=>sF({...f,sellP:e.target.value})} type="number" placeholder="0" className="inp"/></div>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            <div><label style={{fontSize:12,color:'var(--sub)',fontWeight:600,display:'block',marginBottom:4}}>{t.stock}</label><input value={f.stock} onChange={e=>sF({...f,stock:e.target.value})} type="number" placeholder="0" className="inp"/></div>
+            <div><label style={{fontSize:12,color:'var(--sub)',fontWeight:600,display:'block',marginBottom:4}}>{t.minStk}</label><input value={f.minStk} onChange={e=>sF({...f,minStk:e.target.value})} type="number" placeholder="5" className="inp"/></div>
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:20}}>
+          <button onClick={()=>sModal(false)} className="btn Bo">{t.cancel}</button>
+          <button onClick={save} disabled={busy} className="btn Bp">{busy?'...':t.save}</button>
+        </div>
+      </Modal>}
+    </div>
+  );
+};
+
+/* ══ TRANSACTIONS ════════════════════════════════════════════════════════════ */
+const Transactions=({shopId,t,qType,clearQ})=>{
+  const[txs,sTxs]=useState([]);const[prods,sProds]=useState([]);const[parties,sParties]=useState([]);
+  const[typeF,sTypeF]=useState('all');const[period,sPeriod]=useState('all');const[modal,sModal]=useState(!!qType);
+  useEffect(()=>{if(qType)sModal(true);},[qType]);
+  useEffect(()=>{
+    const r1=db.ref(`shops/${shopId}/transactions`);r1.on('value',s=>sTxs(oa(s.val()).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))));
+    db.ref(`shops/${shopId}/inventory`).once('value',s=>sProds(oa(s.val())));
+    db.ref(`shops/${shopId}/parties`).once('value',s=>sParties(oa(s.val())));
+    return()=>r1.off();
+  },[shopId]);
+  const filtered=txs.filter(x=>{
+    const mT=typeF==='all'||x.type===typeF;
+    const mP=period==='all'?true:period==='today'?isToday(x.createdAt):period==='week'?inDays(x.createdAt,7):inMonth(x.createdAt);
+    return mT&&mP;
+  });
+  const tots={sale:filtered.filter(x=>x.type==='sale').reduce((s,x)=>s+(x.amount||0),0),purch:filtered.filter(x=>x.type==='purch').reduce((s,x)=>s+(x.amount||0),0),exp:filtered.filter(x=>x.type==='exp').reduce((s,x)=>s+(x.amount||0),0)};
+  const profit=tots.sale-tots.purch-tots.exp;
+  const TC={sale:{bg:'#dcfce7',ic:'💰',c:'#15803d'},purch:{bg:'#dbeafe',ic:'📦',c:'#1d4ed8'},exp:{bg:'#fee2e2',ic:'💸',c:'#b91c1c'}};
+  return(
+    <div className="FI" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div style={{padding:'48px 14px 12px',background:'var(--card)',borderBottom:'1px solid var(--bdr)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+          <h1 style={{fontSize:22,fontWeight:800,color:'var(--txt)',margin:0}}>💳 {t.tx}</h1>
+          <button onClick={()=>{clearQ&&clearQ();sModal(true);}} style={{background:'var(--p3)',border:'none',borderRadius:14,padding:'9px 18px',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6}}><Ic n="plus" s={14} c="#fff"/> {t.add}</button>
+        </div>
+        <div style={{display:'flex',gap:7,marginBottom:8,overflowX:'auto'}}>
+          {[['all',t.all],['today',t.today],['week',t.week],['month',t.month]].map(([v,l])=><button key={v} onClick={()=>sPeriod(v)} className="pil" style={{borderColor:period===v?'#374151':'var(--bdr)',background:period===v?'#374151':'transparent',color:period===v?'#fff':'var(--sub)'}}>{l}</button>)}
+        </div>
+        <div style={{display:'flex',gap:7,overflowX:'auto'}}>
+          {[['all','সবै'],['sale',t.sale],['purch',t.purch],['exp',t.exp]].map(([v,l])=><button key={v} onClick={()=>sTypeF(v)} className="pil" style={{borderColor:typeF===v?'var(--p3)':'var(--bdr)',background:typeF===v?'var(--p3)':'transparent',color:typeF===v?'#fff':'var(--sub)'}}>{l}</button>)}
+        </div>
+      </div>
+      <div className="S" style={{flex:1,padding:'12px 14px',paddingBottom:80}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginBottom:14}}>
+          {[{l:t.totalSales,v:fmt(tots.sale),c:'#15803d',bg:'#dcfce7'},{l:t.netProfit,v:fmt(profit),c:profit>=0?'#059669':'#dc2626',bg:profit>=0?'#d1fae5':'#fee2e2'},{l:t.totalPurch,v:fmt(tots.purch),c:'#1d4ed8',bg:'#dbeafe'},{l:t.totalExp,v:fmt(tots.exp),c:'#b45309',bg:'#fef3c7'}].map((s,i)=>(
+            <div key={i} style={{background:s.bg,borderRadius:16,padding:'12px 14px'}}>
+              <p style={{fontSize:11,fontWeight:600,color:s.c,margin:'0 0 2px',opacity:.8}}>{s.l}</p>
+              <p style={{fontSize:15,fontWeight:800,color:s.c,margin:0}}>{s.v}</p>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          {filtered.map(tx=>{
+            const pr=prods.find(p=>p.id===tx.productId);const pa=parties.find(p=>p.id===tx.partyId);const s=TC[tx.type]||TC.exp;
+            return(
+              <div key={tx.id} className="cd" style={{padding:'12px 14px',display:'flex',gap:12,alignItems:'center'}}>
+                <div style={{width:40,height:40,borderRadius:14,background:s.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0}}>{s.ic}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+                    <p style={{fontSize:14,fontWeight:600,color:'var(--txt)',margin:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:130}}>{tx.description}</p>
+                    <span className="bdg" style={{background:s.bg,color:s.c,fontSize:10}}>{t[tx.type]}</span>
+                  </div>
+                  <p style={{fontSize:11,color:'var(--sub)',margin:'2px 0 0'}}>{pr?pr.name+' · ':''}{pa?pa.name+' · ':''}{fmtD(tx.createdAt)}</p>
+                </div>
+                <p style={{fontSize:14,fontWeight:800,color:tx.type==='sale'?'#16a34a':'#dc2626',margin:0,flexShrink:0}}>{tx.type==='sale'?'+':'-'}{fmts(tx.amount)}</p>
+              </div>
+            );
+          })}
+          {filtered.length===0&&<div style={{textAlign:'center',padding:'52px 0',color:'var(--sub)'}}><div style={{fontSize:52,marginBottom:12}}>💳</div><p style={{fontSize:15,margin:0}}>{t.noData}</p></div>}
+        </div>
+      </div>
+      {modal&&<TxModal shopId={shopId} t={t} onClose={()=>{sModal(false);clearQ&&clearQ();}} defaultType={qType||'sale'}/>}
+    </div>
+  );
+};
+
+/* ══ PARTIES ══════════════════════════════════════════════════════════════════ */
+const Parties=({shopId,t})=>{
+  const[parties,sParties]=useState([]);const[ledger,sLedger]=useState([]);const[q,sQ]=useState('');
+  const[tab,sTab]=useState('customer');const[sel,sSel]=useState(null);const[addModal,sAddModal]=useState(false);
+  const[txModal,sTxModal]=useState(null);const[cf,sCf]=useState({name:'',type:'customer',phone:'',addr:''});
+  const[tf,sTf]=useState({amount:'',desc:''});const[busy,sBusy]=useState(false);
+  useEffect(()=>{
+    const r1=db.ref(`shops/${shopId}/parties`);r1.on('value',s=>sParties(oa(s.val()).sort((a,b)=>(a.name||'').localeCompare(b.name||''))));
+    const r2=db.ref(`shops/${shopId}/ledger`);r2.on('value',s=>sLedger(oa(s.val()).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))));
+    return()=>{r1.off();r2.off();};
+  },[shopId]);
+  const filtered=parties.filter(p=>p.type===tab&&((p.name||'').toLowerCase().includes(q.toLowerCase())||(p.phone||'').includes(q)));
+  const selP=sel?parties.find(p=>p.id===sel.id)||sel:null;
+  const selL=sel?ledger.filter(l=>l.partyId===sel.id):[];
+  const totalRec=parties.filter(p=>p.type==='customer'&&(p.balance||0)>0).reduce((s,p)=>s+(p.balance||0),0);
+  const totalPay=parties.filter(p=>p.type==='supplier'&&(p.balance||0)<0).reduce((s,p)=>s+Math.abs(p.balance||0),0);
+
+  const addParty=async()=>{if(!cf.name.trim())return;sBusy(true);await db.ref(`shops/${shopId}/parties`).push({name:cf.name.trim(),type:cf.type,phone:cf.phone,addr:cf.addr,balance:0,createdAt:now()});toast('थपियो ✓');sBusy(false);sAddModal(false);sCf({name:'',type:'customer',phone:'',addr:''});};
+  const doTx=async()=>{
+    if(!tf.amount||!sel)return;sBusy(true);
+    const amt=parseFloat(tf.amount);const isCred=txModal==='cred';
+    const sn=await db.ref(`shops/${shopId}/parties/${sel.id}/balance`).once('value');
+    const delta=selP.type==='customer'?(isCred?amt:-amt):(isCred?-amt:amt);
+    await db.ref(`shops/${shopId}/parties/${sel.id}/balance`).set((sn.val()||0)+delta);
+    await db.ref(`shops/${shopId}/ledger`).push({partyId:sel.id,type:txModal,amount:amt,description:tf.desc||(isCred?'उधारो':'भुक्तानी'),createdAt:now()});
+    toast(isCred?'उधारो थपियो ✓':'भुक्तानी थपियो ✓');sBusy(false);sTxModal(null);sTf({amount:'',desc:''});
+  };
+  const sendWA=p=>{
+    const bal=Math.abs(p.balance||0);
+    const msg=`नमस्ते ${p.name}! ${p.balance>0?`तपाईंले रु.${bal.toLocaleString('en-IN')} PasalPro मा दिनु छ।`:`हामीले तपाईंलाई रु.${bal.toLocaleString('en-IN')} दिनु छ।`} धन्यवाद!`;
+    window.open(`https://wa.me/${(p.phone||'').replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
+  };
+
+  if(sel&&selP)return(
+    <div className="FI" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div style={{padding:'48px 16px 16px',background:'var(--card)',borderBottom:'1px solid var(--bdr)'}}>
+        <div style={{display:'flex',alignItems:'center',gap:12}}>
+          <button onClick={()=>sSel(null)} style={{width:36,height:36,background:'var(--bg)',border:'1px solid var(--bdr)',borderRadius:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}><Ic n="back" s={18} c="var(--txt)"/></button>
+          <div style={{flex:1}}>
+            <h1 style={{fontSize:20,fontWeight:800,color:'var(--txt)',margin:0}}>{selP.name}</h1>
+            <p style={{fontSize:12,color:'var(--sub)',margin:'2px 0 0'}}>{selP.type==='customer'?t.customer:t.supplier}{selP.phone?` · ${selP.phone}`:''}</p>
+          </div>
+          {selP.phone&&<button onClick={()=>sendWA(selP)} style={{width:38,height:38,background:'#dcfce7',border:'none',borderRadius:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}><Ic n="wa" s={20} c="#25d366"/></button>}
+        </div>
+      </div>
+      <div className="S" style={{flex:1,padding:16,paddingBottom:80}}>
+        <div style={{background:`linear-gradient(135deg,${selP.balance>0?'#7f1d1d,#dc2626':selP.balance<0?'#052e16,#166534':'#1f2937,#374151'})`,borderRadius:22,padding:'22px',marginBottom:16,boxShadow:`0 8px 32px ${selP.balance>0?'rgba(220,38,38,.3)':selP.balance<0?'rgba(22,163,74,.3)':'rgba(0,0,0,.2)'}`}}>
+          <p style={{fontSize:12,color:'rgba(255,255,255,.6)',margin:'0 0 4px',fontWeight:500}}>{t.bal}</p>
+          <p style={{fontSize:38,fontWeight:900,color:'#fff',margin:'0 0 8px',lineHeight:1}}>{fmt(Math.abs(selP.balance||0))}</p>
+          <p style={{fontSize:14,color:'rgba(255,255,255,.7)',margin:0}}>
+            {selP.balance===0?t.settled:selP.type==='customer'?(selP.balance>0?`${selP.name} ${t.owesYou}`:t.youOwe):(selP.balance<0?`${selP.name} ${t.owesYou}`:t.youOwe)}
+          </p>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
+          <button onClick={()=>sTxModal('cred')} style={{background:'#fee2e2',border:'2px solid #fca5a5',borderRadius:16,padding:'14px',cursor:'pointer',fontWeight:700,fontSize:14,color:'#b91c1c',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>↑ {t.addCred}</button>
+          <button onClick={()=>sTxModal('pay')} style={{background:'#dcfce7',border:'2px solid #86efac',borderRadius:16,padding:'14px',cursor:'pointer',fontWeight:700,fontSize:14,color:'#15803d',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>✓ {t.addPay}</button>
+        </div>
+        <p style={{fontSize:14,fontWeight:700,color:'var(--txt)',margin:'0 0 10px'}}>{t.ledger} ({selL.length})</p>
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          {selL.map(l=>(
+            <div key={l.id} className="cd" style={{padding:'12px 14px',display:'flex',gap:12,alignItems:'center'}}>
+              <div style={{width:36,height:36,borderRadius:12,background:l.type==='cred'?'#fee2e2':'#dcfce7',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:16,color:l.type==='cred'?'#b91c1c':'#15803d',flexShrink:0}}>{l.type==='cred'?'↑':'↓'}</div>
+              <div style={{flex:1}}><p style={{fontSize:14,fontWeight:600,color:'var(--txt)',margin:0}}>{l.description}</p><p style={{fontSize:11,color:'var(--sub)',margin:'2px 0 0'}}>{fmtD(l.createdAt)} · {fmtT(l.createdAt)}</p></div>
+              <p style={{fontSize:14,fontWeight:800,color:l.type==='cred'?'#dc2626':'#16a34a',margin:0,flexShrink:0}}>{l.type==='cred'?'+':'-'}{fmt(l.amount)}</p>
+            </div>
+          ))}
+          {selL.length===0&&<div style={{textAlign:'center',padding:'36px 0',color:'var(--sub)'}}><p>{t.noData}</p></div>}
+        </div>
+      </div>
+      {txModal&&<Modal onClose={()=>sTxModal(null)} title={txModal==='cred'?t.addCred:t.addPay}>
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          <input value={tf.amount} onChange={e=>sTf({...tf,amount:e.target.value})} type="number" placeholder={t.amount} className="inp"/>
+          <input value={tf.desc} onChange={e=>sTf({...tf,desc:e.target.value})} placeholder={t.desc} className="inp"/>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:20}}>
+          <button onClick={()=>sTxModal(null)} className="btn Bo">{t.cancel}</button>
+          <button onClick={doTx} disabled={busy} className="btn Bp">{busy?'...':t.save}</button>
+        </div>
+      </Modal>}
+    </div>
+  );
+
+  return(
+    <div className="FI" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div style={{padding:'48px 14px 12px',background:'var(--card)',borderBottom:'1px solid var(--bdr)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+          <h1 style={{fontSize:22,fontWeight:800,color:'var(--txt)',margin:0}}>👥 {t.party}</h1>
+          <button onClick={()=>sAddModal(true)} style={{background:'var(--p3)',border:'none',borderRadius:14,padding:'9px 18px',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6}}><Ic n="plus" s={14} c="#fff"/> {t.add}</button>
+        </div>
+        <div style={{display:'flex',background:'var(--bg)',borderRadius:14,padding:3,marginBottom:10}}>
+          {['customer','supplier'].map(tp=><button key={tp} onClick={()=>sTab(tp)} style={{flex:1,padding:'9px',borderRadius:11,border:'none',fontWeight:700,fontSize:14,cursor:'pointer',background:tab===tp?'var(--card)':'transparent',color:tab===tp?'var(--txt)':'var(--sub)',boxShadow:tab===tp?'var(--sh)':'none',transition:'all .2s'}}>{tp==='customer'?`👤 ${t.customer}`:`🏭 ${t.supplier}`}</button>)}
+        </div>
+        <input value={q} onChange={e=>sQ(e.target.value)} placeholder={t.search} className="inp"/>
+        {tab==='customer'&&totalRec>0&&<div style={{background:'linear-gradient(135deg,#4c1d95,#7c3aed)',borderRadius:14,padding:'12px 16px',marginTop:10,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div><p style={{fontSize:11,color:'rgba(255,255,255,.6)',margin:'0 0 2px'}}>জম্মা উধারো</p><p style={{fontSize:20,fontWeight:900,color:'#fff',margin:0}}>{fmt(totalRec)}</p></div><span style={{fontSize:24}}>💜</span>
+        </div>}
+      </div>
+      <div className="S" style={{flex:1,padding:'12px 14px',paddingBottom:80}}>
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          {filtered.map(p=>(
+            <div key={p.id} className="cd" style={{padding:'14px',display:'flex',gap:12,alignItems:'center',cursor:'pointer'}} onClick={()=>sSel(p)}>
+              <div style={{width:46,height:46,borderRadius:16,background:'linear-gradient(135deg,var(--p2),var(--p3))',display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:800,color:'#fff',flexShrink:0}}>
+                {(p.name||'?')[0].toUpperCase()}
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <p style={{fontSize:15,fontWeight:700,color:'var(--txt)',margin:0}}>{p.name}</p>
+                <p style={{fontSize:12,color:'var(--sub)',margin:'2px 0 0'}}>{p.phone||p.addr||'—'}</p>
+              </div>
+              <div style={{textAlign:'right',flexShrink:0}}>
+                {p.balance!==0?<>
+                  <p style={{fontSize:15,fontWeight:800,color:p.balance>0?'#dc2626':'#16a34a',margin:0}}>{fmt(Math.abs(p.balance||0))}</p>
+                  <p style={{fontSize:10,fontWeight:600,color:p.balance>0?'#dc2626':'#16a34a',margin:'2px 0 0'}}>{p.balance>0?'उधारो':'Credit'}</p>
+                </>:<p style={{fontSize:12,color:'var(--sub)',margin:0,fontWeight:600}}>{t.settled}</p>}
+              </div>
+              <Ic n="right" s={15} c="var(--sub)"/>
+            </div>
+          ))}
+          {filtered.length===0&&<div style={{textAlign:'center',padding:'52px 0',color:'var(--sub)'}}><div style={{fontSize:52,marginBottom:12}}>👥</div><p style={{fontSize:15,margin:0}}>{t.noData}</p></div>}
+        </div>
+      </div>
+      {addModal&&<Modal onClose={()=>sAddModal(false)} title={t.addParty}>
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          <div style={{display:'flex',background:'var(--bg)',borderRadius:12,padding:3}}>
+            {['customer','supplier'].map(tp=><button key={tp} onClick={()=>sCf({...cf,type:tp})} style={{flex:1,padding:'9px',borderRadius:9,border:'none',fontWeight:700,fontSize:13,cursor:'pointer',background:cf.type===tp?'var(--card)':'transparent',color:cf.type===tp?'var(--txt)':'var(--sub)'}}>{tp==='customer'?t.customer:t.supplier}</button>)}
+          </div>
+          <input value={cf.name} onChange={e=>sCf({...cf,name:e.target.value})} placeholder={t.partyName} className="inp"/>
+          <input value={cf.phone} onChange={e=>sCf({...cf,phone:e.target.value})} placeholder={t.phone} type="tel" className="inp"/>
+          <input value={cf.addr} onChange={e=>sCf({...cf,addr:e.target.value})} placeholder={t.addr} className="inp"/>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:20}}>
+          <button onClick={()=>sAddModal(false)} className="btn Bo">{t.cancel}</button>
+          <button onClick={addParty} disabled={busy} className="btn Bp">{busy?'...':t.add}</button>
+        </div>
+      </Modal>}
+    </div>
+  );
+};
+
+/* ══ REPORTS ══════════════════════════════════════════════════════════════════ */
+const Reports=({shopId,t})=>{
+  const[txs,sTxs]=useState([]);const[period,sPeriod]=useState('month');
+  useEffect(()=>{const r=db.ref(`shops/${shopId}/transactions`);r.on('value',s=>sTxs(oa(s.val())));return()=>r.off();},[shopId]);
+  const filt=txs.filter(x=>period==='all'?true:period==='today'?isToday(x.createdAt):period==='week'?inDays(x.createdAt,7):inMonth(x.createdAt));
+  const sales=filt.filter(x=>x.type==='sale').reduce((s,x)=>s+(x.amount||0),0);
+  const purch=filt.filter(x=>x.type==='purch').reduce((s,x)=>s+(x.amount||0),0);
+  const exp=filt.filter(x=>x.type==='exp').reduce((s,x)=>s+(x.amount||0),0);
+  const profit=sales-purch-exp;
+  const grossM=sales>0?Math.round(((sales-purch)/sales)*100):0;
+  const chartData=useMemo(()=>{const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const v=txs.filter(x=>x.type==='sale'&&x.createdAt&&new Date(x.createdAt).toDateString()===d.toDateString()).reduce((s,x)=>s+(x.amount||0),0);days.push({label:dayL(d.getDay()),v});}return days;},[txs]);
+
+  return(
+    <div className="FI" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div style={{padding:'48px 14px 12px',background:'var(--card)',borderBottom:'1px solid var(--bdr)'}}>
+        <h1 style={{fontSize:22,fontWeight:800,color:'var(--txt)',margin:'0 0 12px'}}>📊 रिपोर्ट</h1>
+        <div style={{display:'flex',gap:7,overflowX:'auto'}}>
+          {[['today',t.today],['week',t.week],['month',t.month],['all',t.all]].map(([v,l])=><button key={v} onClick={()=>sPeriod(v)} className="pil" style={{borderColor:period===v?'var(--p3)':'var(--bdr)',background:period===v?'var(--p3)':'transparent',color:period===v?'#fff':'var(--sub)'}}>{l}</button>)}
+        </div>
+      </div>
+      <div className="S" style={{flex:1,padding:'12px 14px',paddingBottom:80}}>
+        {/* P&L */}
+        <div style={{background:`linear-gradient(135deg,${profit>=0?'#052e16,#166534':'#7f1d1d,#dc2626'})`,borderRadius:22,padding:'22px',marginBottom:14,boxShadow:`0 8px 28px ${profit>=0?'rgba(22,163,74,.3)':'rgba(220,38,38,.3)'}`}}>
+          <p style={{fontSize:12,color:'rgba(255,255,255,.55)',margin:'0 0 5px',fontWeight:500}}>{t.netProfit}</p>
+          <p style={{fontSize:38,fontWeight:900,color:'#fff',margin:'0 0 10px',lineHeight:1}}>{fmt(Math.abs(profit))}</p>
+          <div style={{display:'flex',gap:20}}>
+            <span style={{fontSize:13,color:'rgba(255,255,255,.65)'}}>📈 <b style={{color:'#4ade80'}}>{fmts(sales)}</b></span>
+            <span style={{fontSize:13,color:'rgba(255,255,255,.65)'}}>📦 <b style={{color:'#f87171'}}>{fmts(purch)}</b></span>
+            <span style={{fontSize:13,color:'rgba(255,255,255,.65)'}}>💸 <b style={{color:'#fbbf24'}}>{fmts(exp)}</b></span>
+          </div>
+        </div>
+        {/* Grid */}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginBottom:14}}>
+          {[{l:t.totalSales,v:fmt(sales),c:'#15803d',bg:'#dcfce7',icon:'💰'},{l:t.totalPurch,v:fmt(purch),c:'#1d4ed8',bg:'#dbeafe',icon:'📦'},{l:t.totalExp,v:fmt(exp),c:'#b45309',bg:'#fef3c7',icon:'💸'},{l:'Gross Margin',v:`${grossM}%`,c:'#6d28d9',bg:'#ede9fe',icon:'📊'}].map((s,i)=>(
+            <div key={i} style={{background:s.bg,borderRadius:16,padding:'14px'}}>
+              <span style={{fontSize:22}}>{s.icon}</span>
+              <p style={{fontSize:15,fontWeight:800,color:s.c,margin:'6px 0 2px'}}>{s.v}</p>
+              <p style={{fontSize:11,color:s.c,margin:0,opacity:.8,fontWeight:500}}>{s.l}</p>
+            </div>
+          ))}
+        </div>
+        {/* Chart */}
+        <div className="cd" style={{marginBottom:14}}>
+          <p style={{fontSize:14,fontWeight:700,color:'var(--txt)',margin:'0 0 12px'}}>📈 {t.revenue7}</p>
+          <LineChart data={chartData} color="#4ade80" h={95}/>
+        </div>
+        {/* Breakdown */}
+        <div className="cd">
+          <p style={{fontSize:14,fontWeight:700,color:'var(--txt)',margin:'0 0 14px'}}>कारोबार विवरण</p>
+          {[['sale','💰',sales,'#15803d','#dcfce7'],['purch','📦',purch,'#1d4ed8','#dbeafe'],['exp','💸',exp,'#b45309','#fef3c7']].map(([tp,ic,v,c,bg])=>(
+            <div key={tp} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 12px',background:bg,borderRadius:12,marginBottom:8}}>
+              <span style={{fontSize:20}}>{ic}</span>
+              <div style={{flex:1}}>
+                <p style={{fontSize:14,fontWeight:600,color:c,margin:0}}>{t[tp]}</p>
+                <p style={{fontSize:11,color:c,opacity:.7,margin:'1px 0 0'}}>{filt.filter(x=>x.type===tp).length} कारोबार</p>
+              </div>
+              <p style={{fontSize:15,fontWeight:800,color:c,margin:0}}>{fmt(v)}</p>
+            </div>
+          ))}
+          <div style={{borderTop:'1px solid var(--bdr)',paddingTop:12,display:'flex',justifyContent:'space-between'}}>
+            <span style={{fontSize:15,fontWeight:700,color:'var(--txt)'}}>{t.netProfit}</span>
+            <span style={{fontSize:16,fontWeight:900,color:profit>=0?'#16a34a':'#dc2626'}}>{fmt(profit)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ══ BILLS ════════════════════════════════════════════════════════════════════ */
+const Bills=({shopId,t})=>{
+  const[bills,sBills]=useState([]);const[modal,sModal]=useState(false);const[prev,sPrev]=useState(null);
+  const[f,sF]=useState({desc:'',amount:'',img:null});const[busy,sBusy]=useState(false);const[uploading,sUploading]=useState(false);
+  const fRef=useRef();const cRef=useRef();
+  useEffect(()=>{const r=db.ref(`shops/${shopId}/bills`);r.on('value',s=>sBills(oa(s.val()).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))));return()=>r.off();},[shopId]);
+  const handleFile=async e=>{const file=e.target.files[0];if(!file)return;sUploading(true);try{const c=await compImg(file);sF(p=>({...p,img:c}));}catch{toast('छवि लोड हुन सकेन');}sUploading(false);e.target.value='';};
+  const save=async()=>{if(!f.img)return;sBusy(true);await db.ref(`shops/${shopId}/bills`).push({description:f.desc||'बिल',amount:parseFloat(f.amount)||0,image:f.img,createdAt:now()});toast('बिल थपियो ✓');sBusy(false);sModal(false);sF({desc:'',amount:'',img:null});};
+  const del=async id=>{if(window.confirm('हटाउने?')){await db.ref(`shops/${shopId}/bills/${id}`).remove();toast('हटाइयो');}};
+  return(
+    <div className="FI" style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      <div style={{padding:'48px 14px 16px',background:'var(--card)',borderBottom:'1px solid var(--bdr)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <h1 style={{fontSize:22,fontWeight:800,color:'var(--txt)',margin:0}}>🧾 {t.bills}</h1>
+          <button onClick={()=>sModal(true)} style={{background:'var(--p3)',border:'none',borderRadius:14,padding:'9px 18px',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6}}><Ic n="plus" s={14} c="#fff"/> {t.add}</button>
+        </div>
+      </div>
+      <div className="S" style={{flex:1,padding:'12px 14px',paddingBottom:80}}>
+        {bills.length===0&&<div style={{textAlign:'center',padding:'64px 0',color:'var(--sub)'}}><div style={{fontSize:60,marginBottom:14}}>🧾</div><p style={{fontSize:17,fontWeight:600,margin:'0 0 6px'}}>{t.noBills}</p><p style={{fontSize:13,margin:0}}>बिल खिचेर यहाँ राख्नुहोस्</p></div>}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          {bills.map(b=>(
+            <div key={b.id} style={{background:'var(--card)',borderRadius:18,overflow:'hidden',border:'1px solid var(--bdr)',cursor:'pointer',boxShadow:'var(--sh)',transition:'transform .12s'}} onClick={()=>sPrev(b)}
+              onTouchStart={e=>e.currentTarget.style.transform='scale(.96)'}
+              onTouchEnd={e=>e.currentTarget.style.transform='scale(1)'}>
+              <div style={{height:140,background:'var(--bg)',overflow:'hidden'}}><img src={b.image} alt="bill" style={{width:'100%',height:'100%',objectFit:'cover'}}/></div>
+              <div style={{padding:'10px 12px'}}>
+                <p style={{fontSize:13,fontWeight:600,color:'var(--txt)',margin:'0 0 2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{b.description}</p>
+                {b.amount>0&&<p style={{fontSize:13,fontWeight:700,color:'var(--p3)',margin:'0 0 1px'}}>{fmt(b.amount)}</p>}
+                <p style={{fontSize:11,color:'var(--sub)',margin:0}}>{fmtD(b.createdAt)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {modal&&<Modal onClose={()=>sModal(false)} title={t.addBill}>
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          {f.img?(<div style={{position:'relative'}}>
+            <img src={f.img} alt="preview" style={{width:'100%',borderRadius:14,maxHeight:210,objectFit:'cover'}}/>
+            <button onClick={()=>sF({...f,img:null})} style={{position:'absolute',top:8,right:8,width:28,height:28,background:'rgba(0,0,0,.6)',border:'none',borderRadius:'50%',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}><Ic n="x" s={13} c="#fff"/></button>
+          </div>):(<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            <button onClick={()=>cRef.current.click()} style={{background:'var(--pl)',border:'2px dashed var(--p3)',borderRadius:14,padding:'22px 10px',cursor:'pointer',textAlign:'center',color:'var(--p3)'}}><div style={{fontSize:30,marginBottom:5}}>📷</div><div style={{fontSize:12,fontWeight:600}}>{t.photo}</div></button>
+            <button onClick={()=>fRef.current.click()} style={{background:'var(--bg)',border:'2px dashed var(--bdr)',borderRadius:14,padding:'22px 10px',cursor:'pointer',textAlign:'center',color:'var(--sub)'}}><div style={{fontSize:30,marginBottom:5}}>🖼️</div><div style={{fontSize:12,fontWeight:600}}>{t.gallery}</div></button>
+          </div>)}
+          {uploading&&<p style={{textAlign:'center',color:'var(--sub)',fontSize:13}}>प्रोसेस हुँदैछ...</p>}
+          <input value={f.desc} onChange={e=>sF({...f,desc:e.target.value})} placeholder={t.billDesc} className="inp"/>
+          <input value={f.amount} onChange={e=>sF({...f,amount:e.target.value})} type="number" placeholder={t.billAmt} className="inp"/>
+        </div>
+        <input ref={cRef} type="file" accept="image/*" capture="environment" style={{display:'none'}} onChange={handleFile}/>
+        <input ref={fRef} type="file" accept="image/*" style={{display:'none'}} onChange={handleFile}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginTop:20}}>
+          <button onClick={()=>sModal(false)} className="btn Bo">{t.cancel}</button>
+          <button onClick={save} disabled={busy||!f.img} className="btn Bp">{busy?'...':t.save}</button>
+        </div>
+      </Modal>}
+      {prev&&<Modal onClose={()=>sPrev(null)} title={prev.description||'बिल'}>
+        <div style={{display:'flex',flexDirection:'column',gap:12}}>
+          <img src={prev.image} alt="bill" style={{width:'100%',borderRadius:16,maxHeight:420,objectFit:'contain',background:'var(--bg)'}}/>
+          {prev.amount>0&&<p style={{textAlign:'center',fontSize:20,fontWeight:800,color:'var(--p3)',margin:0}}>{fmt(prev.amount)}</p>}
+          <p style={{textAlign:'center',fontSize:13,color:'var(--sub)',margin:0}}>{fmtD(prev.createdAt)}</p>
+          <button onClick={()=>{del(prev.id);sPrev(null);}} className="btn Br">🗑️ हटाउनुहोस्</button>
+        </div>
+      </Modal>}
+    </div>
+  );
+};
+
+/* ══ SETTINGS ════════════════════════════════════════════════════════════════ */
+const Settings=({shopId,shopData,user,t,lang,sLang,dark,sDark,onLogout,setPage})=>{
+  const[copied,sCopied]=useState(false);const[uName,sUName]=useState('');const[editN,sEditN]=useState(false);
+  useEffect(()=>{db.ref(`users/${user.uid}/name`).once('value',s=>sUName(s.val()||''));},[user]);
+  const copyCode=()=>{navigator.clipboard.writeText(shopData?.code||'').catch(()=>{});sCopied(true);setTimeout(()=>sCopied(false),2500);toast('कोड कपी भयो ✓');};
+  const saveName=async()=>{if(!uName.trim())return;await db.ref(`users/${user.uid}/name`).set(uName.trim());toast('नाम अपडेट ✓');sEditN(false);};
+  const Row=({icon,label,right,onClick,danger,last})=>(
+    <button onClick={onClick} style={{width:'100%',background:'transparent',border:'none',padding:'14px 0',cursor:onClick?'pointer':'default',display:'flex',alignItems:'center',gap:14,borderBottom:last?'none':'1px solid var(--bdr)'}}>
+      <div style={{width:38,height:38,borderRadius:12,background:danger?'#fee2e2':'var(--pl)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontSize:18}}>{icon}</div>
+      <span style={{flex:1,fontSize:15,fontWeight:600,color:danger?'var(--red)':'var(--txt)',textAlign:'left'}}>{label}</span>
+      {right}
+      {onClick&&!right&&<Ic n="right" s={15} c="var(--sub)"/>}
+    </button>
+  );
+  const Section=({title,children})=>(
+    <div style={{marginTop:20}}>
+      <p style={{fontSize:11,fontWeight:700,color:'var(--sub)',textTransform:'uppercase',letterSpacing:.7,margin:'0 0 8px'}}>{title}</p>
+      <div className="cd">{children}</div>
+    </div>
+  );
+  return(
+    <div className="FI S" style={{height:'100%',paddingBottom:80}}>
+      {/* Profile header */}
+      <div style={{background:'linear-gradient(160deg,#052e16,#14532d,#166534)',padding:'48px 20px 28px'}}>
+        <div style={{display:'flex',gap:16,alignItems:'center'}}>
+          <div style={{width:62,height:62,borderRadius:20,background:'rgba(255,255,255,.14)',border:'2px solid rgba(255,255,255,.22)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:26,fontWeight:900,color:'#fff'}}>
+            {(uName||'U')[0].toUpperCase()}
+          </div>
+          <div>
+            <p style={{fontSize:19,fontWeight:800,color:'#fff',margin:0}}>{uName||'User'}</p>
+            <p style={{fontSize:12,color:'rgba(255,255,255,.5)',margin:'3px 0 0'}}>{user.email}</p>
+            <p style={{fontSize:12,color:'rgba(255,255,255,.4)',margin:'2px 0 0'}}>{shopData?.name}</p>
+          </div>
+        </div>
+      </div>
+
+      <div style={{padding:'0 16px'}}>
+        {/* SHOP CODE - in Settings only */}
+        <Section title="पसल कोड">
+          <div style={{padding:'6px 0 10px'}}>
+            <p style={{fontSize:12,color:'var(--sub)',margin:'0 0 6px',fontWeight:500}}>{t.shopCode}</p>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+              <p style={{fontSize:30,fontWeight:900,color:'var(--p3)',margin:0,letterSpacing:7}}>{shopData?.code}</p>
+              <button onClick={copyCode} style={{background:'var(--pl)',border:'2px solid var(--p3)',borderRadius:12,padding:'8px 16px',color:'var(--p3)',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6}}>
+                {copied?<Ic n="check" s={14} c="var(--p3)"/>:<Ic n="copy" s={14} c="var(--p3)"/>}{copied?'✓':'Copy'}
+              </button>
+            </div>
+            <p style={{fontSize:12,color:'var(--sub)',margin:0}}>{t.codeHint}</p>
+          </div>
+        </Section>
+
+        {/* Profile */}
+        <Section title="प्रोफाइल">
+          {editN?<div style={{display:'flex',gap:8,padding:'6px 0'}}>
+            <input value={uName} onChange={e=>sUName(e.target.value)} className="inp" style={{flex:1}}/>
+            <button onClick={saveName} className="btn Bp" style={{width:'auto',padding:'8px 14px',fontSize:13}}>{t.save}</button>
+            <button onClick={()=>sEditN(false)} className="btn Bo" style={{width:'auto',padding:'8px 12px',fontSize:13}}>{t.cancel}</button>
+          </div>:<Row icon="✏️" label={uName||'नाम थप्नुहोस्'} onClick={()=>sEditN(true)}/>}
+        </Section>
+
+        {/* Preferences */}
+        <Section title="Preferences">
+          <Row icon={dark?'☀️':'🌙'} label={t.darkMode} right={<Switch on={dark} onChange={sDark}/>}/>
+          <Row icon="🌐" label={t.language} last right={<button onClick={()=>sLang(lang==='ne'?'en':'ne')} style={{background:'var(--pl)',border:'none',borderRadius:10,padding:'5px 14px',color:'var(--p3)',fontSize:13,fontWeight:700,cursor:'pointer'}}>{lang==='ne'?'English':'नेपाली'}</button>}/>
+        </Section>
+
+        {/* Bills */}
+        <Section title="बिल / Documents">
+          <Row icon="🧾" label={t.bills} onClick={()=>setPage('bills')} last/>
+        </Section>
+
+        {/* About */}
+        <Section title="About">
+          <Row icon="🏪" label="PasalPro" right={<span style={{fontSize:12,color:'var(--sub)',fontWeight:500}}>{t.v}</span>}/>
+          <Row icon="⚡" label="Firebase Realtime Sync" right={<span className="bdg" style={{background:'#dcfce7',color:'#15803d'}}>Active</span>}/>
+          <Row icon="🔒" label="Data Secure & Encrypted" last right={<span className="bdg" style={{background:'#dcfce7',color:'#15803d'}}>✓</span>}/>
+        </Section>
+
+        {/* Logout */}
+        <Section title="Account">
+          <Row icon="🚪" label={t.logout} onClick={onLogout} danger last/>
+        </Section>
+      </div>
+    </div>
+  );
+};
+
+/* ══ ADMIN PANEL ══════════════════════════════════════════════════════════════ */
+const AdminPanel=({user,onLogout,onViewShop,hasShop})=>{
+  const[shops,sShops]=useState([]);const[users,sUsers]=useState([]);const[busy,sBusy]=useState(null);const[selShop,sSelShop]=useState(null);
+  useEffect(()=>{
+    const r1=db.ref('shops');r1.on('value',s=>sShops(oa(s.val()).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))));
+    const r2=db.ref('users');r2.on('value',s=>sUsers(oa(s.val())));
+    return()=>{r1.off();r2.off();};
+  },[]);
+  const toggleStatus=async(shop)=>{
+    sBusy(shop.id);
+    const newStatus=shop.status==='suspended'?'active':'suspended';
+    await db.ref(`shops/${shop.id}/status`).set(newStatus);
+    toast(newStatus==='active'?'पसल सक्रिय गरियो ✓':'पसल बन्द गरियो');sBusy(null);
+  };
+  const trialLeft=shop=>{
+    if(!shop.trialStart)return null;
+    const days=30-Math.floor((Date.now()-shop.trialStart)/864e5);
+    return days;
+  };
+  const activeCount=shops.filter(s=>s.status!=='suspended').length;
+  const suspendedCount=shops.filter(s=>s.status==='suspended').length;
+
+  if(selShop){
+    const shopUsers=users.filter(u=>Object.keys(selShop.members||{}).includes(u.id));
+    const tl=trialLeft(selShop);
+    return(
+      <div style={{minHeight:'100vh',background:'var(--bg)'}}>
+        <div style={{background:'linear-gradient(135deg,#1e1b4b,#4338ca)',padding:'48px 16px 20px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
+            <button onClick={()=>sSelShop(null)} style={{width:36,height:36,background:'rgba(255,255,255,.15)',border:'none',borderRadius:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}><Ic n="back" s={18} c="#fff"/></button>
+            <h1 style={{fontSize:20,fontWeight:800,color:'#fff',margin:0}}>{selShop.name}</h1>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+            {[
+              {l:'Status',v:selShop.status==='suspended'?'Suspended':'Active',c:selShop.status==='suspended'?'#f87171':'#4ade80'},
+              {l:'Code',v:selShop.code,c:'#c4b5fd'},
+              {l:'Members',v:Object.keys(selShop.members||{}).length,c:'#93c5fd'},
+              {l:'Trial Days Left',v:tl!==null?Math.max(0,tl)+'d':'∞',c:tl<5?'#f87171':'#86efac'},
+            ].map((s,i)=><div key={i} style={{background:'rgba(255,255,255,.1)',borderRadius:14,padding:'12px'}}><p style={{fontSize:11,color:'rgba(255,255,255,.55)',margin:'0 0 3px'}}>{s.l}</p><p style={{fontSize:18,fontWeight:800,color:s.c,margin:0}}>{s.v}</p></div>)}
+          </div>
+        </div>
+        <div style={{padding:16}}>
+          <div className="cd" style={{marginBottom:14}}>
+            <p style={{fontSize:14,fontWeight:700,color:'var(--txt)',margin:'0 0 12px'}}>सदस्यहरू ({shopUsers.length})</p>
+            {shopUsers.map(u=><div key={u.id} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 0',borderBottom:'1px solid var(--bdr)'}}>
+              <div style={{width:38,height:38,borderRadius:12,background:'var(--pl)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,color:'var(--p3)',fontSize:17}}>{(u.name||u.email||'U')[0].toUpperCase()}</div>
+              <div><p style={{fontSize:14,fontWeight:600,color:'var(--txt)',margin:0}}>{u.name||'User'}</p><p style={{fontSize:12,color:'var(--sub)',margin:'1px 0 0'}}>{u.email}</p></div>
+              {u.id===selShop.ownerId&&<span className="bdg" style={{background:'#fef3c7',color:'#b45309',marginLeft:'auto'}}>Owner</span>}
+            </div>)}
+          </div>
+          <button onClick={()=>toggleStatus(selShop)} disabled={!!busy} className={`btn ${selShop.status==='suspended'?'Bp':'Br'}`}>
+            {busy===selShop.id?'...':selShop.status==='suspended'?'✓ सक्रिय गर्नुहोस्':'⛔ बन्द गर्नुहोस्'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return(
+    <div style={{minHeight:'100vh',background:'var(--bg)'}}>
+      {/* Admin Header */}
+      <div style={{background:'linear-gradient(160deg,#1e1b4b,#4338ca,#6d28d9)',padding:'48px 16px 24px',position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:-50,right:-50,width:160,height:160,background:'rgba(255,255,255,.05)',borderRadius:'50%'}}/>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:20}}>
+          <div>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:4}}>
+              <Ic n="shield" s={18} c="#c4b5fd"/>
+              <span style={{fontSize:12,color:'#c4b5fd',fontWeight:700,textTransform:'uppercase',letterSpacing:.7}}>Admin</span>
+            </div>
+            <h1 style={{fontSize:24,fontWeight:900,color:'#fff',margin:0}}>PasalPro Admin</h1>
+            <p style={{fontSize:13,color:'rgba(255,255,255,.55)',margin:'3px 0 0'}}>{user.email}</p>
+          </div>
+          <button onClick={onLogout} style={{width:36,height:36,background:'rgba(255,255,255,.12)',border:'1px solid rgba(255,255,255,.2)',borderRadius:12,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}><Ic n="logout" s={16} c="#fff"/></button>
+          {hasShop&&<button onClick={onViewShop} style={{background:'rgba(255,255,255,.15)',border:'1px solid rgba(255,255,255,.25)',borderRadius:12,padding:'7px 14px',color:'#fff',fontSize:13,fontWeight:600,cursor:'pointer'}}>🏪 मेरो पसल</button>}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+          {[{l:'कुल पसल',v:shops.length,icon:'🏪'},{l:'सक्रिय',v:activeCount,icon:'✅'},{l:'बन्द',v:suspendedCount,icon:'⛔'}].map((s,i)=>(
+            <div key={i} style={{background:'rgba(255,255,255,.1)',borderRadius:14,padding:'12px',textAlign:'center'}}>
+              <div style={{fontSize:22,marginBottom:4}}>{s.icon}</div>
+              <p style={{fontSize:22,fontWeight:900,color:'#fff',margin:'0 0 2px'}}>{s.v}</p>
+              <p style={{fontSize:11,color:'rgba(255,255,255,.55)',margin:0,fontWeight:500}}>{s.l}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{padding:'14px 14px 80px'}}>
+        <p style={{fontSize:14,fontWeight:700,color:'var(--txt)',margin:'0 0 12px'}}>सबै पसलहरू ({shops.length})</p>
+        <div style={{display:'flex',flexDirection:'column',gap:9}}>
+          {shops.map(shop=>{
+            const memberCount=Object.keys(shop.members||{}).length;
+            const tl=trialLeft(shop);
+            const suspended=shop.status==='suspended';
+            return(
+              <div key={shop.id} className="cd" style={{borderLeft:`4px solid ${suspended?'var(--red)':tl!==null&&tl<5?'var(--amber)':'var(--p3)'}`}}>
+                <div style={{display:'flex',gap:12,alignItems:'flex-start'}}>
+                  <div style={{width:44,height:44,borderRadius:14,background:suspended?'#fee2e2':'var(--pl)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>
+                    {suspended?'🔒':'🏪'}
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',marginBottom:4}}>
+                      <p style={{fontSize:15,fontWeight:700,color:'var(--txt)',margin:0}}>{shop.name}</p>
+                      <span className="bdg" style={{background:suspended?'#fee2e2':tl!==null&&tl<5?'#fef3c7':'#dcfce7',color:suspended?'#b91c1c':tl!==null&&tl<5?'#b45309':'#15803d'}}>
+                        {suspended?'Suspended':tl!==null?`${Math.max(0,tl)}d trial`:'Active'}
+                      </span>
+                    </div>
+                    <p style={{fontSize:12,color:'var(--sub)',margin:'0 0 6px'}}>Code: <b style={{color:'var(--p3)',letterSpacing:2}}>{shop.code}</b> · {memberCount} member{memberCount!==1?'s':''}</p>
+                    <p style={{fontSize:11,color:'var(--sub)',margin:0}}>Created: {fmtD(shop.createdAt)}</p>
+                  </div>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginTop:12}}>
+                  <button onClick={()=>sSelShop(shop)} style={{background:'#dbeafe',border:'none',borderRadius:12,padding:'9px',fontWeight:700,fontSize:13,color:'#1d4ed8',cursor:'pointer'}}>विवरण हेर्नुहोस्</button>
+                  <button onClick={()=>toggleStatus(shop)} disabled={busy===shop.id} style={{background:suspended?'#dcfce7':'#fee2e2',border:'none',borderRadius:12,padding:'9px',fontWeight:700,fontSize:13,color:suspended?'#15803d':'#b91c1c',cursor:'pointer'}}>
+                    {busy===shop.id?'...':`${suspended?'✓ Activate':'⛔ Suspend'}`}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+          {shops.length===0&&<div style={{textAlign:'center',padding:'52px 0',color:'var(--sub)'}}><div style={{fontSize:52,marginBottom:12}}>🏪</div><p style={{fontSize:15,margin:0}}>कुनै पसल छैन</p></div>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ══ MAIN APP ═════════════════════════════════════════════════════════════════ */
+const MainApp=({user,shopId,shopData,onLogout,isAdmin,onAdminPanel})=>{
+  const[page,sPage]=useState('dash');const[lang,sLang]=useState('ne');const[dark,sDark]=useState(false);const[qTx,sQTx]=useState(null);
+  const t=T[lang];
+  useEffect(()=>{
+    if(dark){document.documentElement.setAttribute('data-dark','true');}
+    else{document.documentElement.removeAttribute('data-dark');}
+    return()=>document.documentElement.removeAttribute('data-dark');
+  },[dark]);
+  const nav=[
+    {id:'dash',icon:'home',label:t.dash},
+    {id:'inv',icon:'box',label:t.inv},
+    {id:'tx',icon:'money',label:t.tx},
+    {id:'party',icon:'users',label:t.party},
+    {id:'rep',icon:'chart',label:t.rep},
+    {id:'set',icon:'settings',label:t.set},
+  ];
+  const goQTx=type=>{sQTx(type);sPage('tx');};
+  const clearQ=()=>sQTx(null);
+  const pages={
+    dash:<Dashboard shopId={shopId} shopData={shopData} t={t} setPage={sPage} setQTx={goQTx} lang={lang} sLang={sLang} dark={dark} sDark={sDark} onLogout={onLogout}/>,
+    inv:<Inventory shopId={shopId} t={t}/>,
+    tx:<Transactions shopId={shopId} t={t} qType={qTx} clearQ={clearQ}/>,
+    party:<Parties shopId={shopId} t={t}/>,
+    rep:<Reports shopId={shopId} t={t}/>,
+    set:<Settings shopId={shopId} shopData={shopData} user={user} t={t} lang={lang} sLang={sLang} dark={dark} sDark={sDark} onLogout={onLogout} setPage={sPage}/>,
+    bills:<Bills shopId={shopId} t={t}/>,
+  };
+  const mainNav=[
+    {id:'dash',icon:'home',label:t.dash},
+    {id:'inv',icon:'box',label:t.inv},
+    {id:'tx',icon:'money',label:t.tx},
+    {id:'party',icon:'users',label:t.party},
+    {id:'bills',icon:'file',label:t.bills},
+    {id:'set',icon:'settings',label:t.set},
+  ];
+  return(
+    <div style={{height:'100vh',display:'flex',flexDirection:'column',background:'var(--bg)'}}>
+      <div style={{flex:1,overflow:'hidden'}}>{pages[page]||pages.dash}</div>
+      <div className="BN">
+        {isAdmin&&<button onClick={onAdminPanel} style={{width:'100%',background:'linear-gradient(135deg,#4338ca,#6d28d9)',border:'none',padding:'6px 16px',color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
+          <Ic n="shield" s={13} c="#fff"/> Admin Panel
+        </button>}
+        <div style={{display:'flex'}}>
+          {mainNav.map(item=>{
+            const act=page===item.id;
+            return(
+              <button key={item.id} onClick={()=>sPage(item.id)} style={{flex:1,border:'none',background:'transparent',padding:'6px 0 9px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
+                <div style={{width:32,height:27,borderRadius:9,background:act?'var(--pl)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',transition:'background .2s'}}>
+                  <Ic n={item.icon} s={18} c={act?'var(--p3)':'var(--sub)'}/>
+                </div>
+                <span style={{fontSize:9,fontWeight:act?700:500,color:act?'var(--p3)':'var(--sub)',lineHeight:1}}>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ══ ROOT ═════════════════════════════════════════════════════════════════════ */
+const App=()=>{
+  const[user,sUser]=useState(undefined);const[shopId,sShopId]=useState(null);const[shopData,sShopData]=useState(null);const[lang]=useState('ne');const[adminViewShop,sAdminViewShop]=useState(false);const shopR=useRef(null);
+  useEffect(()=>auth.onAuthStateChanged(async u=>{
+    if(u){sUser(u);const sn=await db.ref(`users/${u.uid}/shopId`).once('value');const sid=sn.val();if(sid)attach(sid);else sUser(u);}
+    else{sUser(null);sShopId(null);sShopData(null);sAdminViewShop(false);}
+  }),[]);
+  const attach=useCallback(sid=>{
+    if(shopR.current)shopR.current.off();sShopId(sid);
+    const r=db.ref(`shops/${sid}`);shopR.current=r;
+    r.on('value',s=>{if(s.exists())sShopData({id:s.key,...s.val()});});
+  },[]);
+  const logout=async()=>{if(shopR.current)shopR.current.off();await auth.signOut();sShopId(null);sShopData(null);sAdminViewShop(false);};
+
+  if(user===undefined)return<Splash/>;
+  if(!user)return<Auth/>;
+  // Admin always sees admin panel unless they choose to view their shop
+  const isAdmin=user.email===ADMIN_EMAIL;
+  if(isAdmin&&!adminViewShop)return<><AdminPanel user={user} onLogout={logout} onViewShop={()=>sAdminViewShop(true)} hasShop={!!shopId}/><ToastComp/></>;
+  if(!shopId)return<ShopSetup user={user} onDone={attach} lang={lang}/>;
+  if(shopData&&shopData.status==='suspended')return<SuspendedScreen onLogout={logout}/>;
+  return<><MainApp user={user} shopId={shopId} shopData={shopData} onLogout={logout} isAdmin={isAdmin} onAdminPanel={()=>sAdminViewShop(false)}/><ToastComp/></>;
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
