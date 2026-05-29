@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from 'react';
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { ref, get, onValue } from 'firebase/database';
@@ -17,7 +18,7 @@ export default function App() {
   const [memberData,setMemberData]= useState({});
   const [adminView, setAdminView] = useState(false);
   const { toasts, toast }         = useToast();
-  let shopUnsub = null;
+  const shopUnsub = useRef(null);
 
   // ── Auth state listener ────────────────────────────────────────────────────
   // Firebase LOCAL persistence means this fires instantly with cached user.
@@ -64,8 +65,8 @@ export default function App() {
 
   const attachShop = (sid, uid) => {
     setShopId(sid);
-    if (shopUnsub) shopUnsub();
-    shopUnsub = onValue(ref(db, `shops/${sid}`), snap => {
+    if (shopUnsub.current) shopUnsub.current();
+    shopUnsub.current = onValue(ref(db, `shops/${sid}`), snap => {
       const data = snap.val();
       if (data) {
         setShopData({ id: sid, ...data });
@@ -75,7 +76,7 @@ export default function App() {
   };
 
   const logout = async () => {
-    if (shopUnsub) shopUnsub();
+    if (shopUnsub.current) shopUnsub.current();
     await signOut(auth);
     setUser(null); setShopId(null); setShopData(null); setMemberData({});
   };

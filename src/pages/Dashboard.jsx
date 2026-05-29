@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../firebase';
 import { fmt, fmtBS, oa, tsToDateStr } from '../utils/date';
-import { Ic } from './UI';
+import UI from "../components/UI";
 
 export default function Dashboard({ shopId, shopData, role, user, t, lang, onNav, onQuickTx }) {
   const [txs, setTxs] = useState([]);

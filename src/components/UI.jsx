@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 /* ── ICONS ─────────────────────────────────────────────────────────────────── */
 const IP = {
@@ -46,7 +46,7 @@ export const OfflineBanner = ({ onFlush }) => {
   const [offline, setOffline] = useState(!navigator.onLine);
   const [qCount, setQCount] = useState(0);
 
-  useState(() => {
+  useEffect(() => {
     const refresh = () => {
       try { setQCount(JSON.parse(localStorage.getItem('yoga_offline_queue') || '[]').length); } catch {}
     };
@@ -57,7 +57,7 @@ export const OfflineBanner = ({ onFlush }) => {
     window.addEventListener('offline', off);
     const t = setInterval(refresh, 3000);
     return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); clearInterval(t); };
-  });
+  }, [onFlush]);
 
   if (!offline && qCount === 0) return null;
   if (!offline && qCount > 0) return (
@@ -158,6 +158,6 @@ export const Row = ({ icon, label, right, onClick, danger, last }) => (
     <span style={{ fontSize:18,flexShrink:0 }}>{icon}</span>
     <span style={{ flex:1,fontSize:14,fontWeight:600,color:danger?'var(--red)':'var(--txt)' }}>{label}</span>
     {right && <span>{right}</span>}
-    {onClick && <Ic n="back" s={14} c="var(--sub)" style={{ transform:'rotate(180deg)' }}/>}
-  </div>
+  {onClick && <span style={{ transform:'rotate(180deg)', display:'flex' }}><Ic n="back" s={14} c="var(--sub)"/></span>}
+    </div>
 );
