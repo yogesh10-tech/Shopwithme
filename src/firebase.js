@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
-import { getDatabase, enableNetwork } from 'firebase/database';
+import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -15,6 +15,5 @@ export const auth = getAuth(app);
 export const db = getDatabase(app);
 
 setPersistence(auth, browserLocalPersistence);
-enableNetwork(db);
 
 export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'yogeshchapagain733@gmail.com';

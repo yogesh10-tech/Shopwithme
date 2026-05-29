@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { ref, onValue, remove, update } from 'firebase/database';
 import { db } from '../firebase';
 import { fmt, fmtBS, oa, tsToDateStr, dateStrToTs } from '../utils/date';
-import { smartPush } from '../utils/offlineQueue';
-import { Modal, CalcModal, Ic, Switch } from './UI';
+
+import { Modal, CalcModal, Ic } from '../components/UI';
 import TxModal from './TxModal';
 
 export default function Transactions({ shopId, shopData, role, t, lang, toast, qType, clearQ }) {

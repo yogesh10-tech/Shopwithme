@@ -3,7 +3,7 @@ import { ref, onValue, push, set, remove, get } from 'firebase/database';
 import { db } from '../firebase';
 import { fmt, fmtBS, oa, tsToDateStr, dateStrToTs } from '../utils/date';
 import { smartPush, smartUpdate, oqAdd } from '../utils/offlineQueue';
-import { Modal, Ic, CalcModal } from './UI';
+import { Modal, Ic, CalcModal } from '../components/UI';
 
 export default function Parties({ shopId, t, lang, toast }) {
   const [parties, setParties] = useState([]);

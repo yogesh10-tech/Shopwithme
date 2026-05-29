@@ -3,7 +3,7 @@ import { ref, get, push, set } from 'firebase/database';
 import { db } from '../firebase';
 import { oa, tsToDateStr, dateStrToTs, fmt } from '../utils/date';
 import { oqAdd } from '../utils/offlineQueue';
-import { Modal, CalcModal, Switch } from './UI';
+import { Modal, CalcModal, Switch } from '../components/UI';
 
 export default function TxModal({ shopId, shopData, t, onClose, defaultType = 'sale', role, lang, toast }) {
   const [prods, setProds]   = useState([]);
@@ -63,7 +63,7 @@ export default function TxModal({ shopId, shopData, t, onClose, defaultType = 's
         oqAdd({ op:'push', path:`shops/${shopId}/transactions`, data:txData });
         if (f.prodId) {
           const delta = f.type==='sale' ? -qty : f.type==='purch' ? qty : 0;
-          if (delta !== 0) oqAdd({ op:'update', path:`shops/${shopId}/inventory/${f.prodId}`, data:{ stock: delta } });
+          if (delta !== 0) oqAdd({ op:'stockDelta', path:`shops/${shopId}/inventory/${f.prodId}/stock`, data:{ delta } });
         }
         toast('📵 ऑफलाइन — अनलाइन हुँदा सिंक हुनेछ');
       }

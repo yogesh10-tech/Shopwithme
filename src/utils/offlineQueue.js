@@ -21,6 +21,10 @@ export const oqFlush = async (onToast) => {
       if (item.op === 'push') await push(r, item.data);
       else if (item.op === 'set') await set(r, item.data);
       else if (item.op === 'update') await update(r, item.data);
+      else if (item.op === 'stockDelta') {
+        const snap = await get(r);
+        await set(r, (Number(snap.val()) || 0) + item.data.delta);
+      }
       done.push(item._qid);
     } catch { break; }
   }
