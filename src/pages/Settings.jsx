@@ -3,6 +3,7 @@ import { ref, set, get } from 'firebase/database';
 import { updateProfile } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { Sec, Row, Switch, Modal, Ic } from '../components/UI';
+import { hardRefreshApp } from '../utils/refreshApp';
 
 export default function Settings({ shopId, shopData, user, role, lang, setLang, dark, setDark, onLogout, members, toast }) {
   const [copied, setCopied]   = useState(false);
@@ -85,6 +86,16 @@ export default function Settings({ shopId, shopData, user, role, lang, setLang, 
             ))}
           </Sec>
         )}
+
+        {/* App cache */}
+        <Sec title="एप">
+          <Row
+            icon="🔄"
+            label="एप रिफ्रेश (पुरानो डेटा मेटाउने)"
+            onClick={() => hardRefreshApp()}
+            last
+          />
+        </Sec>
 
         {/* Preferences */}
         <Sec title="प्राथमिकताहरू">

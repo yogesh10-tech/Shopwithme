@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "icons": "node scripts/gen-pwa-icons.mjs",
+    "build": "npm run icons && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -14,6 +15,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",
+    "sharp": "^0.33.5",
     "vite": "^5.0.0",
     "vite-plugin-pwa": "^0.17.0"
   }
