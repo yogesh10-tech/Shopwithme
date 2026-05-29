@@ -2,6 +2,12 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getDatabase } from 'firebase/database';
 
+if (!import.meta.env.VITE_FIREBASE_API_KEY) {
+  console.error(
+    'Firebase API key missing. Locally: check .env. On GitHub Pages: add VITE_* secrets and redeploy.'
+  );
+}
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
