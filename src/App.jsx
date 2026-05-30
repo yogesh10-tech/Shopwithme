@@ -5,9 +5,10 @@ import { auth, db, ADMIN_EMAIL } from './firebase';
 import { oqFlush } from './utils/offlineQueue';
 import { useToast } from './hooks/useToast';
 import { ToastComp } from './components/UI';
-import MainApp   from './components/MainApp';
-import Auth      from './pages/Auth';
-import ShopSetup from './pages/ShopSetup';
+import MainApp    from './components/MainApp';
+import Auth       from './pages/Auth';
+import ShopSetup  from './pages/ShopSetup';
+import AdminPanel from './pages/AdminPanel';
 import './index.css';
 
 export default function App() {
@@ -16,6 +17,10 @@ export default function App() {
   const [shopData,  setShopData]  = useState(null);
   const [memberData,setMemberData]= useState({});
   const [adminView, setAdminView] = useState(false);
+
+  useEffect(() => {
+    if (user?.email === ADMIN_EMAIL && user && !shopId) setAdminView(true);
+  }, [user?.email, user, shopId]);
   const { toasts, toast }         = useToast();
   const shopUnsub = useRef(null);
 
@@ -101,21 +106,37 @@ export default function App() {
     </>
   );
 
+  // ── Admin panel ───────────────────────────────────────────────────────────
+  if (isAdmin && adminView) return (
+    <>
+      <AdminPanel
+        hasShop={!!shopId}
+        toast={toast}
+        onClose={() => setAdminView(false)}
+      />
+      <ToastComp toasts={toasts}/>
+    </>
+  );
+
   // ── Logged in but no shop ──────────────────────────────────────────────────
   if (!shopId || !shopData) return (
     <>
-      <ShopSetup user={user} onDone={sid => attachShop(sid, user.uid)}/>
+      <ShopSetup user={user} onDone={sid => attachShop(sid, user.uid)} isAdmin={isAdmin} onAdmin={() => setAdminView(true)}/>
       <ToastComp toasts={toasts}/>
     </>
   );
 
   // ── Suspended ─────────────────────────────────────────────────────────────
   if (shopData.status === 'suspended') return (
-    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:16, padding:24 }}>
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:16, padding:24, background:'var(--bg)' }}>
       <span style={{ fontSize:48 }}>🔒</span>
       <h2 style={{ fontWeight:900, color:'var(--txt)', margin:0 }}>पसल निलम्बित</h2>
       <p style={{ color:'var(--sub)', textAlign:'center' }}>Admin सम्पर्क गर्नुहोस्</p>
-      <button onClick={logout} className="btn Br" style={{ maxWidth:200 }}>लगआउट</button>
+      {isAdmin && (
+        <button type="button" onClick={() => setAdminView(true)} className="btn Bp" style={{ maxWidth:220 }}>Admin Panel</button>
+      )}
+      <button type="button" onClick={logout} className="btn Br" style={{ maxWidth:200 }}>लगआउट</button>
+      <ToastComp toasts={toasts}/>
     </div>
   );
 
@@ -130,7 +151,7 @@ export default function App() {
         isAdmin={isAdmin}
         toast={toast}
         toasts={toasts}
-        onAdminPanel={() => setAdminView(!adminView)}
+        onAdminPanel={() => setAdminView(true)}
         onLogout={logout}
       />
       <ToastComp toasts={toasts}/>

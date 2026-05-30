@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ref, push, set, get, query, orderByChild, equalTo } from 'firebase/database';
 import { auth, db } from '../firebase';
 
-export default function ShopSetup({ user, onDone, lang }) {
+export default function ShopSetup({ user, onDone, isAdmin, onAdmin }) {
   const [tab,  setTab]  = useState('create');
   const [f,    setF]    = useState({ name:'', type:'grocery', code:'' });
   const [busy, setBusy] = useState(false);
@@ -53,6 +53,12 @@ export default function ShopSetup({ user, onDone, lang }) {
           <h1 style={{ fontSize:26, fontWeight:900, color:'#fff', margin:'0 0 4px' }}>पसल सेटअप</h1>
           <p style={{ fontSize:13, color:'rgba(255,255,255,.5)', margin:0 }}>पसल बनाउनुस् वा जोड्नुस्</p>
         </div>
+
+        {isAdmin && onAdmin && (
+          <button type="button" onClick={onAdmin} className="btn" style={{ width:'100%', marginBottom:12, background:'linear-gradient(135deg,#4338ca,#6d28d9)', color:'#fff', borderRadius:14, padding:'12px', fontWeight:700, fontSize:14, border:'none', cursor:'pointer' }}>
+            🛡️ Admin Panel
+          </button>
+        )}
 
         <div style={{ background:'var(--card)', borderRadius:24, padding:'24px' }}>
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:20 }}>

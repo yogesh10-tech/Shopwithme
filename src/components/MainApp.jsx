@@ -34,7 +34,6 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
     return () => u();
   }, [shopId]);
 
-  // Sync offline queue when online
   useEffect(() => {
     const handler = () => oqFlush(toast);
     window.addEventListener('online', handler);
@@ -44,91 +43,117 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
   const logout = () => { signOut(auth).then(onLogout); };
 
   const ownerNav = [
-    { id:'dash',  icon:'home',     label:'ड्यासबोर्ड' },
-    { id:'inv',   icon:'box',      label:'सूची' },
+    { id:'dash',  icon:'home',     label:'गृह' },
     { id:'tx',    icon:'money',    label:'कारोबार' },
     { id:'party', icon:'users',    label:'पार्टी' },
     { id:'rep',   icon:'chart',    label:'रिपोर्ट' },
-    { id:'bills', icon:'file',     label:'बिल' },
-    { id:'set',   icon:'settings', label:'सेटिङ' },
+    { id:'more',  icon:'settings', label:'अझै' },
   ];
   const cashierNav = [
-    { id:'dash',  icon:'home',     label:'ड्यासबोर्ड' },
+    { id:'dash',  icon:'home',     label:'गृह' },
     { id:'tx',    icon:'money',    label:'कारोबार' },
     { id:'bills', icon:'file',     label:'बिल' },
     { id:'set',   icon:'settings', label:'सेटिङ' },
   ];
   const activeNav = role === 'owner' ? ownerNav : cashierNav;
 
-  const pages = {
-    dash:  <Dashboard  shopId={shopId} shopData={shopData} role={role} user={user} lang={lang} t={{}} onNav={setPage} onQuickTx={tp=>{setQType(tp);setPage('tx');}}/>,
-    inv:   <Inventory  shopId={shopId} shopData={shopData} role={role} t={{}} lang={lang} toast={toast}/>,
-    tx:    <Transactions shopId={shopId} shopData={shopData} role={role} t={{}} lang={lang} toast={toast} qType={qType} clearQ={()=>setQType(null)}/>,
-    party: <Parties    shopId={shopId} t={{}} lang={lang} toast={toast}/>,
-    rep:   <Reports    shopId={shopId} lang={lang} toast={toast}/>,
-    bills: <Bills      shopId={shopId} shopData={shopData} lang={lang} toast={toast}/>,
-    set:   <Settings   shopId={shopId} shopData={shopData} user={user} role={role} lang={lang} setLang={setLang} dark={dark} setDark={setDark} onLogout={logout} members={members} toast={toast}/>,
+  const renderPage = () => {
+    if (page === 'more') {
+      return (
+        <div className="S FI" style={{ height:'100%', paddingBottom:76 }}>
+          <header className="page-hdr">
+            <h1 className="page-title">अझै</h1>
+          </header>
+          <div style={{ padding:'8px 12px' }}>
+            {[
+              { id:'inv', icon:'box', label:'सूची / स्टक', desc:'सामान व्यवस्थापन' },
+              { id:'bills', icon:'file', label:'बिल', desc:'इनभ्वाइस हेर्नुहोस्' },
+              { id:'set', icon:'settings', label:'सेटिङ', desc:'पसल, भाषा, सदस्य' },
+            ].map(item => (
+              <button key={item.id} type="button" onClick={() => setPage(item.id)} className="cd" style={{ width:'100%', marginBottom:8, display:'flex', alignItems:'center', gap:14, padding:'14px 16px', cursor:'pointer', border:'1px solid var(--bdr)', textAlign:'left' }}>
+                <div style={{ width:44, height:44, borderRadius:12, background:'var(--pl)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <Ic n={item.icon} s={22} c="var(--p2)"/>
+                </div>
+                <div>
+                  <p style={{ margin:0, fontSize:15, fontWeight:700, color:'var(--txt)' }}>{item.label}</p>
+                  <p style={{ margin:'2px 0 0', fontSize:12, color:'var(--sub)' }}>{item.desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    const pages = {
+      dash:  <Dashboard  shopId={shopId} shopData={shopData} role={role} user={user} lang={lang} t={{}} onNav={setPage} onQuickTx={tp=>{setQType(tp);setPage('tx');}}/>,
+      inv:   <Inventory  shopId={shopId} shopData={shopData} role={role} t={{}} lang={lang} toast={toast}/>,
+      tx:    <Transactions shopId={shopId} shopData={shopData} role={role} t={{}} lang={lang} toast={toast} qType={qType} clearQ={()=>setQType(null)}/>,
+      party: <Parties    shopId={shopId} t={{}} lang={lang} toast={toast}/>,
+      rep:   <Reports    shopId={shopId} lang={lang} toast={toast}/>,
+      bills: <Bills      shopId={shopId} shopData={shopData} lang={lang} toast={toast}/>,
+      set:   <Settings   shopId={shopId} shopData={shopData} user={user} role={role} lang={lang} setLang={setLang} dark={dark} setDark={setDark} onLogout={logout} members={members} toast={toast}/>,
+    };
+    return pages[page] || pages.dash;
   };
+
+  const navPage = ['inv','bills','set'].includes(page) ? 'more' : page;
 
   return (
     <div data-dark={dark} style={{ height:'100%' }}>
       <OfflineBanner onFlush={() => oqFlush(toast)}/>
       <div className="app-shell">
 
-        {/* Sidebar — desktop only */}
         <aside className="app-sidebar">
-          <div style={{ marginBottom:24,padding:'0 6px' }}>
-            <div style={{ fontSize:22,fontWeight:900,letterSpacing:1,color:'var(--p2)' }}>🪴 Yoga</div>
-            <div style={{ fontSize:13,fontWeight:700,color:'var(--txt)',marginTop:5,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{shopData?.name}</div>
-            <div style={{ fontSize:11,color:'var(--sub)',marginTop:2 }}>{role === 'owner' ? '👑 मालिक' : '🔑 क्यासियर'}</div>
+          <div style={{ marginBottom:20, padding:'0 6px' }}>
+            <div className="brand-mark">🪴 Yoga कारोबार</div>
+            <div style={{ fontSize:14, fontWeight:700, color:'var(--txt)', marginTop:6, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{shopData?.name}</div>
+            <div className="brand-sub">{role === 'owner' ? '👑 मालिक' : '🔑 क्यासियर'}</div>
           </div>
           {isAdmin && (
-            <button onClick={onAdminPanel} style={{ width:'100%',background:'linear-gradient(135deg,#4338ca,#6d28d9)',border:'none',borderRadius:11,padding:'9px 12px',color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:8,marginBottom:10 }}>
-              <Ic n="shield" s={13} c="#fff"/> Admin Panel
+            <button type="button" onClick={onAdminPanel} className="admin-nav-btn" style={{ borderRadius:11, marginBottom:12 }}>
+              <Ic n="shield" s={14} c="#fff"/> Admin Panel
             </button>
           )}
-          <nav style={{ flex:1,display:'flex',flexDirection:'column',gap:3 }}>
-            {activeNav.map(item => {
-              const act = page === item.id;
+          <nav style={{ flex:1, display:'flex', flexDirection:'column', gap:2 }}>
+            {(role === 'owner' ? [...ownerNav, { id:'inv', icon:'box', label:'सूची' }, { id:'bills', icon:'file', label:'बिल' }] : cashierNav).map(item => {
+              const act = page === item.id || (item.id === 'more' && ['inv','bills','set'].includes(page));
               return (
-                <button key={item.id} onClick={()=>setPage(item.id)} style={{ display:'flex',alignItems:'center',gap:10,padding:'11px 12px',borderRadius:12,border:'none',background:act?'var(--pl)':'transparent',cursor:'pointer',color:act?'var(--p2)':'var(--sub)',fontWeight:act?700:500,fontSize:14,textAlign:'left',width:'100%',transition:'background .15s' }}>
+                <button key={item.id} type="button" onClick={() => setPage(item.id)} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', borderRadius:12, border:'none', background:act?'var(--pl)':'transparent', cursor:'pointer', color:act?'var(--p2)':'var(--sub)', fontWeight:act?700:500, fontSize:14, textAlign:'left', width:'100%' }}>
                   <Ic n={item.icon} s={18} c={act?'var(--p3)':'var(--sub)'}/>
                   {item.label}
                 </button>
               );
             })}
           </nav>
-          <div style={{ borderTop:'1px solid var(--bdr)',paddingTop:10,display:'flex',flexDirection:'column',gap:4 }}>
-            <button onClick={()=>setDark(!dark)} style={{ display:'flex',alignItems:'center',gap:10,padding:'9px 12px',borderRadius:11,border:'none',background:'transparent',cursor:'pointer',color:'var(--sub)',fontSize:13,width:'100%' }}>
-              <span style={{ fontSize:16 }}>{dark?'☀️':'🌙'}</span> {dark?'Light Mode':'Dark Mode'}
+          <div style={{ borderTop:'1px solid var(--bdr)', paddingTop:10, display:'flex', flexDirection:'column', gap:4 }}>
+            <button type="button" onClick={() => setDark(!dark)} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 12px', borderRadius:11, border:'none', background:'transparent', cursor:'pointer', color:'var(--sub)', fontSize:13, width:'100%' }}>
+              <span style={{ fontSize:16 }}>{dark ? '☀️' : '🌙'}</span> {dark ? 'Light' : 'Dark'}
             </button>
-            <button onClick={logout} style={{ display:'flex',alignItems:'center',gap:10,padding:'9px 12px',borderRadius:11,border:'none',background:'#fee2e2',cursor:'pointer',color:'var(--red)',fontSize:13,fontWeight:700,width:'100%' }}>
+            <button type="button" onClick={logout} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 12px', borderRadius:11, border:'none', background:'#fee2e2', cursor:'pointer', color:'var(--red)', fontSize:13, fontWeight:700, width:'100%' }}>
               <Ic n="logout" s={16} c="var(--red)"/> लगआउट
             </button>
           </div>
         </aside>
 
-        {/* Main content */}
         <div className="app-content">
-          {pages[page] || pages.dash}
+          {renderPage()}
         </div>
 
-        {/* Bottom nav — mobile only */}
         <div className="BN">
           {isAdmin && (
-            <button onClick={onAdminPanel} style={{ width:'100%',background:'linear-gradient(135deg,#4338ca,#6d28d9)',border:'none',padding:'6px 16px',color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:6 }}>
-              <Ic n="shield" s={13} c="#fff"/> Admin Panel
+            <button type="button" onClick={onAdminPanel} className="admin-nav-btn">
+              <Ic n="shield" s={13} c="#fff"/> Admin
             </button>
           )}
-          <div style={{ display:'flex' }}>
+          <div className="nav-inner">
             {activeNav.map(item => {
-              const act = page === item.id;
+              const act = navPage === item.id;
               return (
-                <button key={item.id} onClick={()=>setPage(item.id)} style={{ flex:1,border:'none',background:'transparent',padding:'6px 0 9px',cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:2 }}>
-                  <div style={{ width:34,height:27,borderRadius:9,background:act?'var(--pl)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',transition:'background .2s' }}>
-                    <Ic n={item.icon} s={18} c={act?'var(--p3)':'var(--sub)'}/>
+                <button key={item.id} type="button" onClick={() => setPage(item.id)} className="nav-item">
+                  <div className={`nav-ico ${act ? 'active' : ''}`}>
+                    <Ic n={item.icon} s={18} c={act ? 'var(--p3)' : 'var(--sub)'}/>
                   </div>
-                  <span style={{ fontSize:9,fontWeight:act?700:500,color:act?'var(--p3)':'var(--sub)',lineHeight:1 }}>{item.label}</span>
+                  <span className={`nav-lbl ${act ? 'active' : ''}`}>{item.label}</span>
                 </button>
               );
             })}
