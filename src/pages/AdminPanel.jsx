@@ -66,7 +66,7 @@ export default function AdminPanel({ onClose, toast, hasShop }) {
   return (
     <div className="admin-panel S FI">
       <header className="page-hdr admin-hdr">
-        <button type="button" onClick={onClose} className="icon-btn" aria-label="Back">
+        <button type="button" onClick={onClose} className="icon-btn" aria-label="Back" style={{ background:'rgba(255,255,255,.2)' }}>
           <Ic n="back" s={20} c="#fff"/>
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -77,7 +77,11 @@ export default function AdminPanel({ onClose, toast, hasShop }) {
       </header>
 
       <div style={{ padding: '16px' }}>
-        {/* Stats */}
+        <div className="admin-welcome">
+          <h2>🛡️ स्वागत छ, Admin!</h2>
+          <p>यहाँबाट सबै पसल हेर्नुहोस् र प्रयोगकर्ता निलम्बित वा सक्रिय गर्नुहोस्।</p>
+        </div>
+
         <div className="stat-row">
           <div className="stat-chip"><span className="stat-num">{stats.active}</span><span className="stat-lbl">सक्रिय</span></div>
           <div className="stat-chip stat-warn"><span className="stat-num">{stats.suspended}</span><span className="stat-lbl">निलम्बित</span></div>

@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ref, onValue } from 'firebase/database';
 import { db } from '../firebase';
 import { fmt, fmtBS, oa, tsToDateStr } from '../utils/date';
+import { WelcomeBanner, MiniBarChart } from '../components/UI';
 
-export default function Dashboard({ shopId, shopData, role, user, t, lang, onNav, onQuickTx }) {
+export default function Dashboard({ shopId, shopData, role, user, lang, onNav, onQuickTx, isAdmin, onAdminPanel }) {
   const [txs, setTxs] = useState([]);
   const [parties, setParties] = useState([]);
   const today = tsToDateStr(Date.now());
@@ -23,6 +24,21 @@ export default function Dashboard({ shopId, shopData, role, user, t, lang, onNav
   const profit = sale - purch - exp;
   const totalUdharo = parties.reduce((s,p)=>s+(p.balance||0),0);
   const recent = txs.slice(0,6);
+
+  const weekChart = useMemo(() => {
+    const labels = ['आ', 'सो', 'मं', 'बु', 'बि', 'शु', 'श'];
+    return [...Array(7)].map((_, i) => {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - (6 - i));
+      const ds = tsToDateStr(d.getTime());
+      const value = txs
+        .filter(t => t.type === 'sale' && tsToDateStr(t.createdAt) === ds)
+        .reduce((s, t) => s + (t.amount || 0), 0);
+      const dayIdx = d.getDay();
+      return { label: labels[dayIdx] || labels[i], value };
+    });
+  }, [txs]);
 
   const TxList = ({ items }) => (
     <>
@@ -44,20 +60,21 @@ export default function Dashboard({ shopId, shopData, role, user, t, lang, onNav
   );
 
   if (role === 'cashier') return (
-    <div className="S FI" style={{ height:'100%', paddingBottom:76, background:'var(--bg)' }}>
-      <div style={{ padding:'16px' }}>
+    <div className="page-wrap S FI">
+      <div className="page-body">
+        <WelcomeBanner name={user?.displayName} shopName={shopData?.name} isAdmin={isAdmin} onAdmin={onAdminPanel}/>
         <div className="hero-card">
           <p style={{ fontSize:12, opacity:.75, margin:'0 0 2px' }}>{fmtBS(Date.now(),lang)}</p>
-          <h1 style={{ fontSize:20, fontWeight:800, margin:'0 0 12px' }}>{shopData?.name}</h1>
           <p style={{ fontSize:12, opacity:.7, margin:0 }}>आजको बिक्री</p>
           <p style={{ fontSize:32, fontWeight:900, margin:'4px 0 0' }}>{fmt(sale)}</p>
         </div>
-        <button type="button" onClick={()=>onQuickTx('sale')} className="btn Bp" style={{ marginBottom:16, borderRadius:16, padding:16 }}>
+        <MiniBarChart data={weekChart} title="७ दिनको बिक्री (ग्राफ)"/>
+        <button type="button" onClick={()=>onQuickTx('sale')} className="btn Bp" style={{ borderRadius:16, padding:16 }}>
           💰 बिक्री थप्नुहोस्
         </button>
         {recent.length > 0 && (
           <>
-            <p style={{ fontSize:13, fontWeight:700, color:'var(--sub)', margin:'0 0 8px' }}>हालका कारोबार</p>
+            <p className="section-title">हालका कारोबार</p>
             <TxList items={recent.slice(0,5)}/>
           </>
         )}
@@ -66,35 +83,34 @@ export default function Dashboard({ shopId, shopData, role, user, t, lang, onNav
   );
 
   return (
-    <div className="S FI" style={{ height:'100%', paddingBottom:76 }}>
-      <header className="page-hdr" style={{ background:'transparent', border:'none', paddingBottom:0 }}>
-        <div>
-          <p style={{ fontSize:12, color:'var(--sub)', margin:0 }}>{fmtBS(Date.now(),lang)}</p>
-          <h1 className="page-title">{shopData?.name || 'कारोबार'}</h1>
-        </div>
-      </header>
-      <div style={{ padding:'0 16px 16px' }}>
+    <div className="page-wrap S FI">
+      <div className="page-body">
+        <WelcomeBanner name={user?.displayName} shopName={shopData?.name} isAdmin={isAdmin} onAdmin={onAdminPanel}/>
+
         <div className="hero-card">
-          <p style={{ fontSize:12, opacity:.75, margin:0 }}>आजको नाफा</p>
-          <p style={{ fontSize:28, fontWeight:900, margin:'4px 0 8px', color: profit >= 0 ? '#fff' : '#fecaca' }}>{fmt(profit)}</p>
+          <p style={{ fontSize:12, opacity:.75, margin:0 }}>आजको नाफा · {fmtBS(Date.now(),lang)}</p>
+          <p style={{ fontSize:28, fontWeight:900, margin:'6px 0 8px', color: profit >= 0 ? '#fff' : '#fecaca' }}>{fmt(profit)}</p>
           <div style={{ display:'flex', gap:16, fontSize:12, opacity:.85 }}>
             <span>बिक्री {fmt(sale)}</span>
             <span>खर्च {fmt(exp+purch)}</span>
           </div>
         </div>
 
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:14 }}>
-          <div className="cd" style={{ padding:12 }}>
+        <MiniBarChart data={weekChart} title="७ दिनको बिक्री (ग्राफ)"/>
+
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+          <div className="cd" style={{ padding:14 }}>
             <p style={{ fontSize:11, color:'var(--sub)', fontWeight:700, margin:0 }}>उधारो</p>
-            <p style={{ fontSize:18, fontWeight:900, color:'var(--purple)', margin:'4px 0 0' }}>{fmt(totalUdharo)}</p>
+            <p style={{ fontSize:18, fontWeight:900, color:'var(--purple)', margin:'6px 0 0' }}>{fmt(totalUdharo)}</p>
           </div>
-          <div className="cd" style={{ padding:12 }}>
+          <div className="cd" style={{ padding:14 }}>
             <p style={{ fontSize:11, color:'var(--sub)', fontWeight:700, margin:0 }}>आजको बिक्री</p>
-            <p style={{ fontSize:18, fontWeight:900, color:'var(--p2)', margin:'4px 0 0' }}>{fmt(sale)}</p>
+            <p style={{ fontSize:18, fontWeight:900, color:'var(--p2)', margin:'6px 0 0' }}>{fmt(sale)}</p>
           </div>
         </div>
 
-        <div className="quick-grid">
+        <p className="section-title">छिटो कारोबार</p>
+        <div className="quick-grid" style={{ marginBottom:0 }}>
           {[
             { label:'बिक्री', type:'sale', icon:'💰' },
             { label:'खरिद', type:'purch', icon:'📦' },
@@ -109,8 +125,8 @@ export default function Dashboard({ shopId, shopData, role, user, t, lang, onNav
 
         {recent.length > 0 && (
           <>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8 }}>
-              <p style={{ fontSize:14, fontWeight:700, color:'var(--txt)', margin:0 }}>हालका कारोबार</p>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+              <p className="section-title" style={{ margin:0 }}>हालका कारोबार</p>
               <button type="button" onClick={()=>onNav('tx')} style={{ fontSize:12, color:'var(--p2)', background:'none', border:'none', fontWeight:700, cursor:'pointer' }}>सबै →</button>
             </div>
             <TxList items={recent}/>

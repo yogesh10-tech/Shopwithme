@@ -60,11 +60,22 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
   const renderPage = () => {
     if (page === 'more') {
       return (
-        <div className="S FI" style={{ height:'100%', paddingBottom:76 }}>
+        <div className="page-wrap S FI">
           <header className="page-hdr">
             <h1 className="page-title">अझै</h1>
           </header>
-          <div style={{ padding:'8px 12px' }}>
+          <div className="page-body" style={{ paddingTop:8 }}>
+            {isAdmin && (
+              <button type="button" onClick={onAdminPanel} className="cd admin-menu-card" style={{ width:'100%', marginBottom:4, display:'flex', alignItems:'center', gap:14, padding:'16px', cursor:'pointer', textAlign:'left' }}>
+                <div style={{ width:48, height:48, borderRadius:14, background:'linear-gradient(135deg,#4338ca,#6d28d9)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <Ic n="shield" s={24} c="#fff"/>
+                </div>
+                <div>
+                  <p style={{ margin:0, fontSize:16, fontWeight:800, color:'#4338ca' }}>🛡️ Admin Panel</p>
+                  <p style={{ margin:'4px 0 0', fontSize:12, color:'var(--sub)' }}>पसल निलम्बित / सक्रिय गर्नुहोस्</p>
+                </div>
+              </button>
+            )}
             {[
               { id:'inv', icon:'box', label:'सूची / स्टक', desc:'सामान व्यवस्थापन' },
               { id:'bills', icon:'file', label:'बिल', desc:'इनभ्वाइस हेर्नुहोस्' },
@@ -85,13 +96,13 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
       );
     }
     const pages = {
-      dash:  <Dashboard  shopId={shopId} shopData={shopData} role={role} user={user} lang={lang} t={{}} onNav={setPage} onQuickTx={tp=>{setQType(tp);setPage('tx');}}/>,
+      dash:  <Dashboard  shopId={shopId} shopData={shopData} role={role} user={user} lang={lang} t={{}} onNav={setPage} onQuickTx={tp=>{setQType(tp);setPage('tx');}} isAdmin={isAdmin} onAdminPanel={onAdminPanel}/>,
       inv:   <Inventory  shopId={shopId} shopData={shopData} role={role} t={{}} lang={lang} toast={toast}/>,
       tx:    <Transactions shopId={shopId} shopData={shopData} role={role} t={{}} lang={lang} toast={toast} qType={qType} clearQ={()=>setQType(null)}/>,
       party: <Parties    shopId={shopId} t={{}} lang={lang} toast={toast}/>,
       rep:   <Reports    shopId={shopId} lang={lang} toast={toast}/>,
       bills: <Bills      shopId={shopId} shopData={shopData} lang={lang} toast={toast}/>,
-      set:   <Settings   shopId={shopId} shopData={shopData} user={user} role={role} lang={lang} setLang={setLang} dark={dark} setDark={setDark} onLogout={logout} members={members} toast={toast}/>,
+      set:   <Settings   shopId={shopId} shopData={shopData} user={user} role={role} lang={lang} setLang={setLang} dark={dark} setDark={setDark} onLogout={logout} members={members} toast={toast} isAdmin={isAdmin} onAdminPanel={onAdminPanel}/>,
     };
     return pages[page] || pages.dash;
   };
@@ -160,6 +171,11 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
           </div>
         </div>
       </div>
+      {isAdmin && (
+        <button type="button" onClick={onAdminPanel} className="admin-fab" aria-label="Admin Panel">
+          <Ic n="shield" s={18} c="#fff"/> Admin
+        </button>
+      )}
       <ToastComp toasts={toasts}/>
     </div>
   );

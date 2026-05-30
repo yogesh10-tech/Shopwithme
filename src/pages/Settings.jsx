@@ -5,7 +5,7 @@ import { auth, db } from '../firebase';
 import { Sec, Row, Switch, Modal, Ic } from '../components/UI';
 import { hardRefreshApp } from '../utils/refreshApp';
 
-export default function Settings({ shopId, shopData, user, role, lang, setLang, dark, setDark, onLogout, members, toast }) {
+export default function Settings({ shopId, shopData, user, role, lang, setLang, dark, setDark, onLogout, members, toast, isAdmin, onAdminPanel }) {
   const [copied, setCopied]   = useState(false);
   const [editN,  setEditN]    = useState(false);
   const [uName,  setUName]    = useState('');
@@ -28,8 +28,20 @@ export default function Settings({ shopId, shopData, user, role, lang, setLang, 
   const qCount = () => { try { return JSON.parse(localStorage.getItem('yoga_offline_queue')||'[]').length; } catch { return 0; } };
 
   return (
-    <div className="S FI" style={{ height:'100%', paddingBottom:76 }}>
-      <div style={{ padding:'16px 16px 32px' }}>
+    <div className="page-wrap S FI">
+      <header className="page-hdr">
+        <h1 className="page-title">सेटिङ</h1>
+      </header>
+      <div className="page-body">
+        {isAdmin && onAdminPanel && (
+          <button type="button" onClick={onAdminPanel} className="cd admin-menu-card" style={{ width:'100%', display:'flex', alignItems:'center', gap:14, padding:'16px', cursor:'pointer', border:'none', textAlign:'left', marginBottom:4 }}>
+            <span style={{ fontSize:28 }}>🛡️</span>
+            <div>
+              <p style={{ margin:0, fontSize:16, fontWeight:800, color:'#4338ca' }}>Admin Panel खोल्नुहोस्</p>
+              <p style={{ margin:'4px 0 0', fontSize:12, color:'var(--sub)' }}>सबै पसल हेर्नुहोस् · निलम्बित गर्नुहोस्</p>
+            </div>
+          </button>
+        )}
         {/* Profile card */}
         <div style={{ background:'linear-gradient(135deg,#0f766e,#134e4a)',borderRadius:24,padding:'22px',marginBottom:16,color:'#fff' }}>
           <div style={{ display:'flex',alignItems:'center',gap:14,marginBottom:14 }}>

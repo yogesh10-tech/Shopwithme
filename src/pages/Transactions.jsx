@@ -3,7 +3,7 @@ import { ref, onValue, remove, update } from 'firebase/database';
 import { db } from '../firebase';
 import { fmt, fmtBS, oa, tsToDateStr, dateStrToTs } from '../utils/date';
 
-import { Modal, CalcModal, Ic } from '../components/UI';
+import { Modal, CalcModal, Ic, PageWrap } from '../components/UI';
 import TxModal from './TxModal';
 
 export default function Transactions({ shopId, shopData, role, t, lang, toast, qType, clearQ }) {
@@ -53,16 +53,15 @@ export default function Transactions({ shopId, shopData, role, t, lang, toast, q
   };
 
   return (
-    <div className="S FI" style={{ height:'100%', paddingBottom:76 }}>
-      <div style={{ padding:'16px 16px 0' }}>
-        <header className="page-hdr" style={{ margin:'-16px -16px 14px', padding:'18px 16px' }}>
-          <h1 className="page-title">कारोबार</h1>
-          <div style={{ flex:1 }}/>
-          <button type="button" onClick={()=>setModal(true)} style={{ background:'var(--p2)',border:'none',borderRadius:12,padding:'10px 14px',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6 }}>
-            <Ic n="plus" s={14} c="#fff"/> थप
-          </button>
-        </header>
-
+    <>
+    <PageWrap
+      title="कारोबार"
+      action={
+        <button type="button" onClick={()=>setModal(true)} style={{ background:'var(--p2)',border:'none',borderRadius:12,padding:'10px 14px',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6 }}>
+          <Ic n="plus" s={14} c="#fff"/> थप
+        </button>
+      }
+    >
         {/* Period filter */}
         <div style={{ display:'flex',gap:6,marginBottom:10,overflowX:'auto',paddingBottom:4 }}>
           {[['today','आज'],['week','हप्ता'],['month','महिना'],['all','सबै']].map(([v,l]) => (
@@ -121,11 +120,11 @@ export default function Transactions({ shopId, shopData, role, t, lang, toast, q
             </div>
           );
         })}
-      </div>
+    </PageWrap>
 
       {modal && <TxModal shopId={shopId} shopData={shopData} t={t} onClose={()=>{setModal(false);clearQ&&clearQ();}} defaultType={qType||'sale'} role={role} lang={lang} toast={toast}/>}
       {editTx && <EditTxModal tx={editTx} shopId={shopId} lang={lang} toast={toast} onClose={()=>setEditTx(null)}/>}
-    </div>
+    </>
   );
 }
 

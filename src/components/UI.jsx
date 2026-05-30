@@ -145,6 +145,63 @@ export const CalcModal = ({ onDone, onClose, initial = '' }) => {
   );
 };
 
+/* ── PAGE LAYOUT ────────────────────────────────────────────────────────────── */
+export function PageWrap({ title, action, children }) {
+  return (
+    <div className="page-wrap S FI">
+      {title && (
+        <header className="page-hdr">
+          <h1 className="page-title">{title}</h1>
+          {action && <div style={{ marginLeft: 'auto' }}>{action}</div>}
+        </header>
+      )}
+      <div className="page-body">{children}</div>
+    </div>
+  );
+}
+
+export function WelcomeBanner({ name, shopName, isAdmin, onAdmin }) {
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'शुभ प्रभात' : hour < 17 ? 'नमस्ते' : 'शुभ साँझ';
+  const who = name || 'साथी';
+  return (
+    <div className="welcome-card cd">
+      <div className="welcome-avatar">{(who[0] || 'Y').toUpperCase()}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p className="welcome-greet">{greet}, {who} 👋</p>
+        <p className="welcome-shop">{shopName || 'Yoga कारोबार'}</p>
+        <p className="welcome-sub">आजको कारोबार यहाँबाट हेर्नुहोस्</p>
+      </div>
+      {isAdmin && onAdmin && (
+        <button type="button" onClick={onAdmin} className="welcome-admin-btn">
+          🛡️ Admin
+        </button>
+      )}
+    </div>
+  );
+}
+
+export function MiniBarChart({ data, title }) {
+  const max = Math.max(...data.map(d => d.value), 1);
+  return (
+    <div className="chart-card cd">
+      {title && <p className="chart-title">{title}</p>}
+      <div className="bar-chart">
+        {data.map((d, i) => (
+          <div key={i} className="bar-col">
+            <div
+              className="bar-fill"
+              style={{ height: `${Math.max(8, (d.value / max) * 72)}px` }}
+              title={String(d.value)}
+            />
+            <span className="bar-lbl">{d.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── SETTINGS HELPERS ───────────────────────────────────────────────────────── */
 export const Sec = ({ title, children }) => (
   <div className="cd" style={{ marginBottom:12,padding:'6px 4px' }}>

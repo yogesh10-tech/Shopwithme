@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { ref, get, onValue } from 'firebase/database';
-import { auth, db, ADMIN_EMAIL } from './firebase';
+import { auth, db } from './firebase';
+import { isAdminEmail } from './utils/admin';
 import { oqFlush } from './utils/offlineQueue';
 import { useToast } from './hooks/useToast';
 import { ToastComp } from './components/UI';
@@ -19,7 +20,7 @@ export default function App() {
   const [adminView, setAdminView] = useState(false);
 
   useEffect(() => {
-    if (user?.email === ADMIN_EMAIL && user && !shopId) setAdminView(true);
+    if (isAdminEmail(user?.email) && user && !shopId) setAdminView(true);
   }, [user?.email, user, shopId]);
   const { toasts, toast }         = useToast();
   const shopUnsub = useRef(null);
@@ -89,11 +90,11 @@ export default function App() {
   // Admin email = always owner. Shop owner UID = owner. Others = cashier.
   // ALL members see the SAME app — role only controls what they can do.
   const role = !user ? null
-    : (user.email === ADMIN_EMAIL || shopData?.ownerId === user.uid)
+    : (isAdminEmail(user.email) || shopData?.ownerId === user.uid)
       ? 'owner'
       : (memberData.role || 'cashier');
 
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = isAdminEmail(user?.email);
 
   // ── Loading ────────────────────────────────────────────────────────────────
   if (user === undefined) return null; // HTML splash shows until this resolves
