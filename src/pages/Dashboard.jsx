@@ -89,16 +89,16 @@ export default function Dashboard({ shopId, shopData, role, user, lang, onNav, o
 
         {/* Karobar-style summary cards */}
         <div className="summary-cards-container">
-          <div className="summary-card summary-card-get">
+          <button type="button" onClick={()=>onNav('party', 'customer')} className="summary-card summary-card-get" style={{ cursor:'pointer', border:'none', background:'inherit', padding:0 }}>
             <p className="summary-label">Total To Get</p>
             <p className="summary-amount">{fmt(Math.max(0, totalUdharo))}</p>
             <p className="summary-sub">Amount receivable</p>
-          </div>
-          <div className="summary-card summary-card-give">
+          </button>
+          <button type="button" onClick={()=>onNav('party', 'supplier')} className="summary-card summary-card-give" style={{ cursor:'pointer', border:'none', background:'inherit', padding:0 }}>
             <p className="summary-label">Total To Give</p>
             <p className="summary-amount">{fmt(Math.abs(Math.min(0, totalUdharo)))}</p>
             <p className="summary-sub">Amount payable</p>
-          </div>
+          </button>
         </div>
 
         <MiniBarChart data={weekChart} title="७ दिनको बिक्री (ग्राफ)"/>

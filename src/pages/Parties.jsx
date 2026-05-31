@@ -5,10 +5,10 @@ import { fmt, fmtBS, oa, tsToDateStr, dateStrToTs } from '../utils/date';
 import { smartPush, smartUpdate, oqAdd } from '../utils/offlineQueue';
 import { Modal, Ic, CalcModal } from '../components/UI';
 
-export default function Parties({ shopId, t, lang, toast }) {
+export default function Parties({ shopId, t, lang, toast, initialTab = 'customer' }) {
   const [parties, setParties] = useState([]);
   const [ledger,  setLedger]  = useState([]);
-  const [tab,   setTab]   = useState('customer');
+  const [tab,   setTab]   = useState(initialTab);
   const [sel,   setSel]   = useState(null);
   const [addModal, setAddModal] = useState(false);
   const [txModal,  setTxModal]  = useState(null); // 'cred' | 'pay'

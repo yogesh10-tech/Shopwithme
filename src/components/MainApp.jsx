@@ -18,6 +18,7 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
   const [lang, setLang]   = useState(() => localStorage.getItem('meropasal_lang') || 'ne');
   const [members, setMembers] = useState({});
   const [qType, setQType] = useState(null);
+  const [partyTab, setPartyTab] = useState('customer');
 
   useEffect(() => {
     document.documentElement.setAttribute('data-dark', dark);
@@ -95,10 +96,10 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
       );
     }
     const pages = {
-      dash:  <Dashboard  shopId={shopId} shopData={shopData} role={role} user={user} lang={lang} t={{}} onNav={setPage} onQuickTx={tp=>{setQType(tp);setPage('tx');}} isAdmin={isAdmin} onAdminPanel={onAdminPanel}/>,
+      dash:  <Dashboard  shopId={shopId} shopData={shopData} role={role} user={user} lang={lang} t={{}} onNav={(p, t) => { if (t) setPartyTab(t); setPage(p); }} onQuickTx={tp=>{setQType(tp);setPage('tx');}} isAdmin={isAdmin} onAdminPanel={onAdminPanel}/>,
       inv:   <Inventory  shopId={shopId} shopData={shopData} role={role} t={{}} lang={lang} toast={toast}/>,
       tx:    <Transactions shopId={shopId} shopData={shopData} role={role} t={{}} lang={lang} toast={toast} qType={qType} clearQ={()=>setQType(null)}/>,
-      party: <Parties    shopId={shopId} t={{}} lang={lang} toast={toast}/>,
+      party: <Parties    shopId={shopId} t={{}} lang={lang} toast={toast} initialTab={partyTab}/>,
       rep:   <Reports    shopId={shopId} lang={lang} toast={toast}/>,
       bills: <Bills      shopId={shopId} shopData={shopData} lang={lang} toast={toast}/>,
       set:   <Settings   shopId={shopId} shopData={shopData} user={user} role={role} lang={lang} setLang={setLang} dark={dark} setDark={setDark} onLogout={logout} members={members} toast={toast} isAdmin={isAdmin} onAdminPanel={onAdminPanel}/>,
