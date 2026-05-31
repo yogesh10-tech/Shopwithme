@@ -5,6 +5,7 @@ import { fmt, fmtBS, oa, tsToDateStr, dateStrToTs } from '../utils/date';
 
 import { Modal, CalcModal, Ic, PageWrap } from '../components/UI';
 import TxModal from './TxModal';
+import BarcodeScanner from './BarcodeScanner';
 
 export default function Transactions({ shopId, shopData, role, t, lang, toast, qType, clearQ }) {
   const [txs, setTxs]       = useState([]);
@@ -14,6 +15,8 @@ export default function Transactions({ shopId, shopData, role, t, lang, toast, q
   const [period, setPeriod] = useState('today');
   const [modal,  setModal]  = useState(!!qType);
   const [editTx, setEditTx] = useState(null);
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannedProduct, setScannedProduct] = useState(null);
 
   useEffect(() => {
     const r1 = ref(db, `shops/${shopId}/transactions`);
@@ -45,6 +48,12 @@ export default function Transactions({ shopId, shopData, role, t, lang, toast, q
     catch { toast('त्रुटि भयो'); }
   };
 
+  const handleScannerSelect = ({ product, quantity }) => {
+    setScannedProduct({ productId: product.id, product, quantity });
+    setShowScanner(false);
+    setModal(true);
+  };
+
   const pmIcon = { cash:'💵', esewa:'🟢', khalti:'🟣', qr:'📱', fonepay:'📲' };
   const typeStyle = {
     sale:  { bg:'#f0fdfa', c:'#0f766e', ic:'💰' },
@@ -57,9 +66,14 @@ export default function Transactions({ shopId, shopData, role, t, lang, toast, q
     <PageWrap
       title="कारोबार"
       action={
-        <button type="button" onClick={()=>setModal(true)} style={{ background:'var(--p2)',border:'none',borderRadius:12,padding:'10px 14px',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6 }}>
-          <Ic n="plus" s={14} c="#fff"/> थप
-        </button>
+        <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+          <button type="button" onClick={()=>setShowScanner(true)} style={{ background:'var(--p3)',border:'none',borderRadius:12,padding:'10px 14px',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6 }}>
+            <Ic n="camera" s={14} c="#fff"/> स्क्यान
+          </button>
+          <button type="button" onClick={()=>setModal(true)} style={{ background:'var(--p2)',border:'none',borderRadius:12,padding:'10px 14px',color:'#fff',fontSize:13,fontWeight:700,cursor:'pointer',display:'flex',alignItems:'center',gap:6 }}>
+            <Ic n="plus" s={14} c="#fff"/> थप
+          </button>
+        </div>
       }
     >
         {/* Period filter */}
@@ -122,8 +136,9 @@ export default function Transactions({ shopId, shopData, role, t, lang, toast, q
         })}
     </PageWrap>
 
-      {modal && <TxModal shopId={shopId} shopData={shopData} t={t} onClose={()=>{setModal(false);clearQ&&clearQ();}} defaultType={qType||'sale'} role={role} lang={lang} toast={toast}/>}
+      {modal && <TxModal shopId={shopId} shopData={shopData} t={t} onClose={()=>{setModal(false);clearQ&&clearQ();setScannedProduct(null);}} defaultType={qType||'sale'} role={role} lang={lang} toast={toast} scannedProduct={scannedProduct}/>}
       {editTx && <EditTxModal tx={editTx} shopId={shopId} lang={lang} toast={toast} onClose={()=>setEditTx(null)}/>}
+      {showScanner && <BarcodeScanner products={prods} onSelect={handleScannerSelect} onClose={()=>setShowScanner(false)}/>}
     </>
   );
 }

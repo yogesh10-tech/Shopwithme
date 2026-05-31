@@ -5,7 +5,7 @@ import { oa, fmt, fmtBS } from '../utils/date';
 import { oqAdd } from '../utils/offlineQueue';
 import { Modal, Ic, CalcModal } from '../components/UI';
 
-const blank = { name:'', category:'', buyP:'', sellP:'', stock:'', unit:'पिस', minStock:'' };
+const blank = { name:'', category:'', buyP:'', sellP:'', stock:'', unit:'पिस', minStock:'', barcode:'' };
 
 export default function Inventory({ shopId, role, lang, toast }) {
   const [items,  setItems]  = useState([]);
@@ -23,13 +23,13 @@ export default function Inventory({ shopId, role, lang, toast }) {
   }, [shopId]);
 
   const openAdd = () => { setF(blank); setEditing(null); setModal(true); };
-  const openEdit = item => { setF({ name:item.name||'', category:item.category||'', buyP:String(item.buyP||''), sellP:String(item.sellP||''), stock:String(item.stock||''), unit:item.unit||'पिस', minStock:String(item.minStock||'') }); setEditing(item.id); setModal(true); };
+  const openEdit = item => { setF({ name:item.name||'', category:item.category||'', buyP:String(item.buyP||''), sellP:String(item.sellP||''), stock:String(item.stock||''), unit:item.unit||'पिस', minStock:String(item.minStock||''), barcode:item.barcode||'' }); setEditing(item.id); setModal(true); };
 
   const save = async () => {
     if (!f.name.trim()) return;
     setBusy(true);
     try {
-      const data = { name:f.name.trim(), category:f.category, buyP:parseFloat(f.buyP)||0, sellP:parseFloat(f.sellP)||0, stock:parseFloat(f.stock)||0, unit:f.unit, minStock:parseFloat(f.minStock)||0, updatedAt:Date.now() };
+      const data = { name:f.name.trim(), category:f.category, buyP:parseFloat(f.buyP)||0, sellP:parseFloat(f.sellP)||0, stock:parseFloat(f.stock)||0, unit:f.unit, minStock:parseFloat(f.minStock)||0, barcode:f.barcode||'', updatedAt:Date.now() };
       if (navigator.onLine) {
         if (editing) await update(ref(db, `shops/${shopId}/inventory/${editing}`), data);
         else { data.createdAt = Date.now(); await push(ref(db, `shops/${shopId}/inventory`), data); }
@@ -133,6 +133,7 @@ export default function Inventory({ shopId, role, lang, toast }) {
             <div style={{ display:'flex',flexDirection:'column',gap:10 }}>
               <input value={f.name} onChange={e=>setF({...f,name:e.target.value})} placeholder="सामानको नाम *" className="inp"/>
               <input value={f.category} onChange={e=>setF({...f,category:e.target.value})} placeholder="वर्ग (जस्तै: खाना, पेय)" className="inp"/>
+              <input value={f.barcode} onChange={e=>setF({...f,barcode:e.target.value})} placeholder="बारकोड (वैकल्पिक)" className="inp"/>
               <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:10 }}>
                 <div style={{ position:'relative' }}>
                   <input value={f.buyP} onChange={e=>setF({...f,buyP:e.target.value})} type="number" placeholder="लागत मूल्य" className="inp" style={{ paddingRight:40 }}/>

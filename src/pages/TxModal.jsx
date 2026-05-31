@@ -5,11 +5,11 @@ import { oa, tsToDateStr, dateStrToTs, fmt } from '../utils/date';
 import { oqAdd } from '../utils/offlineQueue';
 import { Modal, CalcModal, Switch } from '../components/UI';
 
-export default function TxModal({ shopId, shopData, t, onClose, defaultType = 'sale', role, lang, toast }) {
+export default function TxModal({ shopId, shopData, t, onClose, defaultType = 'sale', role, lang, toast, scannedProduct }) {
   const [prods, setProds]   = useState([]);
   const [parties, setParties] = useState([]);
   const [f, setF] = useState({
-    type: defaultType, amount:'', desc:'', prodId:'', qty:'1',
+    type: defaultType, amount:'', desc:'', prodId:scannedProduct?.productId||'', qty:String(scannedProduct?.quantity||'1'),
     partyId:'', isCredit: false, payMethod:'cash', useVat: false,
     date: tsToDateStr(Date.now())
   });
