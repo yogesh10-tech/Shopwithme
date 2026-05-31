@@ -21,6 +21,19 @@ export default function TxModal({ shopId, shopData, t, onClose, defaultType = 's
     get(ref(db, `shops/${shopId}/parties`)).then(s  => setParties(oa(s.val()).sort((a,b)=>(a.name||'').localeCompare(b.name||''))));
   }, [shopId]);
 
+  // Auto-open calculator when user focuses on amount field with special keys or directly type
+  const handleAmountKeyDown = (e) => {
+    // Open calculator on: Ctrl+M, *+, /, or when user tries to calculate
+    if (e.ctrlKey && e.key === 'm') {
+      e.preventDefault();
+      setShowCalc(true);
+    } else if (['+', '-', '*', '/', '='].includes(e.key)) {
+      // If user presses an operator, auto-open calculator
+      e.preventDefault();
+      setShowCalc(true);
+    }
+  };
+
   const save = async () => {
     const amt = parseFloat(f.amount);
     if (!amt || amt <= 0) return;
@@ -92,11 +105,11 @@ export default function TxModal({ shopId, shopData, t, onClose, defaultType = 's
             <label style={{ fontSize:12,color:'var(--sub)',fontWeight:600,display:'block',marginBottom:4 }}>📅 मिति</label>
             <input type="date" value={f.date} onChange={e=>setF({...f,date:e.target.value})} max={tsToDateStr(Date.now())} className="inp"/>
           </div>
-          <div>
+           <div>
             <label style={{ fontSize:12,color:'var(--sub)',fontWeight:600,display:'block',marginBottom:4 }}>रकम</label>
             <div style={{ position:'relative' }}>
-              <input value={f.amount} onChange={e=>setF({...f,amount:e.target.value})} type="number" placeholder="0" className="inp" style={{ paddingRight:48 }}/>
-              <button onClick={()=>setShowCalc(true)} style={{ position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',width:32,height:32,background:'var(--pl)',border:'none',borderRadius:10,cursor:'pointer',fontSize:16 }}>🧮</button>
+              <input value={f.amount} onChange={e=>setF({...f,amount:e.target.value})} onKeyDown={handleAmountKeyDown} type="number" placeholder="0" className="inp" style={{ paddingRight:48 }}/>
+              <button onClick={()=>setShowCalc(true)} style={{ position:'absolute',right:10,top:'50%',transform:'translateY(-50%)',width:32,height:32,background:'var(--pl)',border:'none',borderRadius:10,cursor:'pointer',fontSize:16 }} title="Calculator (Ctrl+M)">🧮</button>
             </div>
           </div>
           <input value={f.desc} onChange={e=>setF({...f,desc:e.target.value})} placeholder="विवरण" className="inp"/>

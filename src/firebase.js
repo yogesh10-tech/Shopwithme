@@ -20,6 +20,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getDatabase(app);
 
-setPersistence(auth, browserLocalPersistence);
+// Set persistence immediately and do not await - allows faster auth restoration
+setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence setup:', e));
 
 export const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'yogeshchapagain733@gmail.com';

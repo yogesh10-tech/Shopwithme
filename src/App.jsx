@@ -26,16 +26,12 @@ export default function App() {
   const shopUnsub = useRef(null);
 
   // ── Auth state listener ────────────────────────────────────────────────────
-  // Firebase LOCAL persistence means this fires instantly with cached user.
-  // User will NEVER see Auth screen again until they explicitly log out.
+  // Firebase LOCAL persistence restores instantly from browser cache.
+  // If user was logged in, they stay logged in. No login screen shown twice.
   useEffect(() => {
-    // Auth timeout: if Firebase takes >30s, unblock UI (increased for better UX)
-    const timeout = setTimeout(() => {
-      if (user === undefined) setUser(null);
-    }, 30000);
-
+    let timeout;
     const unsub = onAuthStateChanged(auth, async u => {
-      clearTimeout(timeout);
+      if (timeout) clearTimeout(timeout);
       if (u) {
         setUser(u);
         try {
@@ -50,7 +46,7 @@ export default function App() {
       }
     });
 
-    return () => { clearTimeout(timeout); unsub(); };
+    return () => { if (timeout) clearTimeout(timeout); unsub(); };
   }, []);
 
   // ── Sync offline queue on reconnect ───────────────────────────────────────
