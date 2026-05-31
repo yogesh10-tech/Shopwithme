@@ -36,7 +36,7 @@ export default function Bills({ shopId, shopData, lang }) {
       .total{font-size:20px;font-weight:900;color:#0f766e}h1{color:#0f766e}
       .hdr{text-align:center;margin-bottom:20px}.inv{font-size:12px;color:#666}</style></head>
       <body>
-      <div class="hdr"><h1>🪴 ${shopData?.name||'Yoga'}</h1>
+      <div class="hdr"><h1>🪴 ${shopData?.name||'Mero Pasal'}</h1>
       <p class="inv">Invoice #${tx.invNo||'N/A'} | ${new Date(tx.createdAt).toLocaleDateString()}</p>
       ${party?`<p>${party.name}</p>`:''}
       </div>
@@ -46,7 +46,7 @@ export default function Bills({ shopId, shopData, lang }) {
       ${tx.useVat?`<div class="row"><span>VAT (13%)</span><span>रु.${tx.vatAmount||0}</span></div>`:''}
       <div class="row"><span><b>जम्मा</b></span><span class="total">रु.${tx.totalAmount||tx.amount}</span></div>
       <div class="row"><span>भुक्तानी विधि</span><span>${tx.paymentMethod||'cash'}</span></div>
-      <br><p style="text-align:center;color:#999;font-size:12px">Yoga Smart Business App — धन्यवाद!</p>
+      <br><p style="text-align:center;color:#999;font-size:12px">Mero Pasal Smart Business App — धन्यवाद!</p>
       </body></html>
     `);
     win.document.close();
@@ -64,7 +64,7 @@ export default function Bills({ shopId, shopData, lang }) {
           <div className="inv-paper">
             <div style={{ textAlign:'center',marginBottom:20,paddingBottom:16,borderBottom:'2px dashed #e2e8f0' }}>
               <p style={{ fontSize:28,margin:'0 0 4px' }}>🪴</p>
-              <h2 style={{ fontSize:20,fontWeight:900,color:'#0f766e',margin:'0 0 4px' }}>{shopData?.name||'Yoga'}</h2>
+              <h2 style={{ fontSize:20,fontWeight:900,color:'#0f766e',margin:'0 0 4px' }}>{shopData?.name||'Mero Pasal'}</h2>
               <p style={{ fontSize:12,color:'#94a3b8',margin:0 }}>Invoice #{sel.invNo||'N/A'}</p>
             </div>
             {party && <div style={{ marginBottom:12 }}><p style={{ fontSize:13,color:'#64748b',margin:'0 0 2px' }}>ग्राहक</p><p style={{ fontSize:16,fontWeight:700,color:'#0f172a',margin:0 }}>{party.name}</p>{party.phone&&<p style={{ fontSize:12,color:'#94a3b8',margin:'2px 0 0' }}>{party.phone}</p>}</div>}

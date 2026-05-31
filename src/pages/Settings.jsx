@@ -10,7 +10,7 @@ export default function Settings({ shopId, shopData, user, role, lang, setLang, 
   const [editN,  setEditN]    = useState(false);
   const [uName,  setUName]    = useState('');
   const [showPin,setShowPin]  = useState(false);
-  const hasPin = !!localStorage.getItem(`yoga_pin_${shopId}`);
+  const hasPin = !!localStorage.getItem(`meropasal_pin_${shopId}`);
 
   const copyCode = () => {
     navigator.clipboard?.writeText(shopData?.code || '').then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
@@ -25,7 +25,7 @@ export default function Settings({ shopId, shopData, user, role, lang, setLang, 
     } catch { toast('त्रुटि भयो'); }
   };
 
-  const qCount = () => { try { return JSON.parse(localStorage.getItem('yoga_offline_queue')||'[]').length; } catch { return 0; } };
+  const qCount = () => { try { return JSON.parse(localStorage.getItem('meropasal_offline_queue')||'[]').length; } catch { return 0; } };
 
   return (
     <div className="page-wrap S FI">
@@ -136,7 +136,7 @@ export default function Settings({ shopId, shopData, user, role, lang, setLang, 
 
         {/* About */}
         <Sec title="About">
-          <Row icon="🪴" label="Yoga Smart Business App" right={<span style={{ fontSize:12,color:'var(--sub)' }}>v6.0</span>}/>
+          <Row icon="🪴" label="Mero Pasal Smart Business App" right={<span style={{ fontSize:12,color:'var(--sub)' }}>v6.0</span>}/>
           <Row icon="🔒" label="डेटा सुरक्षित र ब्याकअप" right={<span style={{ fontSize:11,background:'#f0fdfa',color:'#0f766e',padding:'2px 8px',borderRadius:10,fontWeight:700 }}>✓</span>}/>
           <Row icon="📜" label="Privacy Policy" last onClick={()=>window.open('https://yogesh10-tech.github.io/yoga-privacy-policy','_blank')}/>
         </Sec>

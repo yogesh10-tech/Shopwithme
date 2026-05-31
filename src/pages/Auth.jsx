@@ -41,7 +41,7 @@ export default function Auth({ lang }) {
         {/* Logo */}
         <div style={{ textAlign:'center', marginBottom:32 }}>
           <div style={{ fontSize:56, marginBottom:8 }}>🪴</div>
-          <h1 style={{ fontSize:30, fontWeight:900, color:'#fff', margin:'0 0 4px' }}>Yoga कारोबार</h1>
+          <h1 style={{ fontSize:30, fontWeight:900, color:'#fff', margin:'0 0 4px' }}>Mero Pasal</h1>
           <p style={{ fontSize:14, color:'rgba(255,255,255,.5)', margin:0 }}>सजिलो पसल व्यवस्थापन</p>
         </div>
 

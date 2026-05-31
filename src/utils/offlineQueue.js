@@ -1,7 +1,7 @@
 import { ref, push, set, update, get } from 'firebase/database';
 import { db } from '../firebase';
 
-const OQ_KEY = 'yoga_offline_queue';
+const OQ_KEY = 'meropasal_offline_queue';
 
 export const oqLoad = () => { try { return JSON.parse(localStorage.getItem(OQ_KEY) || '[]'); } catch { return []; } };
 export const oqSave = q => localStorage.setItem(OQ_KEY, JSON.stringify(q));

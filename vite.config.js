@@ -22,8 +22,8 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: 'मेरो पसल - Yoga',
-        short_name: 'Yoga',
+        name: 'मेरो पसल - Mero Pasal',
+        short_name: 'Mero Pasal',
         description: 'Smart Business App for Nepal',
         theme_color: '#0f766e',
         background_color: '#f0fdf4',

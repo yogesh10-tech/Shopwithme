@@ -29,10 +29,10 @@ export default function App() {
   // Firebase LOCAL persistence means this fires instantly with cached user.
   // User will NEVER see Auth screen again until they explicitly log out.
   useEffect(() => {
-    // Auth timeout: if Firebase takes >10s, unblock UI
+    // Auth timeout: if Firebase takes >30s, unblock UI (increased for better UX)
     const timeout = setTimeout(() => {
       if (user === undefined) setUser(null);
-    }, 10000);
+    }, 30000);
 
     const unsub = onAuthStateChanged(auth, async u => {
       clearTimeout(timeout);

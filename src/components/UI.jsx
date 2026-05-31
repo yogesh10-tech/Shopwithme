@@ -50,7 +50,7 @@ export const OfflineBanner = ({ onFlush }) => {
 
   useEffect(() => {
     const refresh = () => {
-      try { setQCount(JSON.parse(localStorage.getItem('yoga_offline_queue') || '[]').length); } catch {}
+      try { setQCount(JSON.parse(localStorage.getItem('meropasal_offline_queue') || '[]').length); } catch {}
     };
     refresh();
     const on = () => { setOffline(false); onFlush && onFlush(); refresh(); };

@@ -14,18 +14,18 @@ import Settings    from '../pages/Settings';
 
 export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, toasts, onAdminPanel, onLogout }) {
   const [page, setPage]   = useState('dash');
-  const [dark, setDark]   = useState(() => localStorage.getItem('yoga_dark') === '1');
-  const [lang, setLang]   = useState(() => localStorage.getItem('yoga_lang') || 'ne');
+  const [dark, setDark]   = useState(() => localStorage.getItem('meropasal_dark') === '1');
+  const [lang, setLang]   = useState(() => localStorage.getItem('meropasal_lang') || 'ne');
   const [members, setMembers] = useState({});
   const [qType, setQType] = useState(null);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-dark', dark);
-    localStorage.setItem('yoga_dark', dark ? '1' : '0');
+    localStorage.setItem('meropasal_dark', dark ? '1' : '0');
   }, [dark]);
 
   useEffect(() => {
-    localStorage.setItem('yoga_lang', lang);
+    localStorage.setItem('meropasal_lang', lang);
   }, [lang]);
 
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
 
         <aside className="app-sidebar">
           <div style={{ marginBottom:20, padding:'0 6px' }}>
-            <div className="brand-mark">🪴 Yoga कारोबार</div>
+            <div className="brand-mark">🪴 Mero Pasal</div>
             <div style={{ fontSize:14, fontWeight:700, color:'var(--txt)', marginTop:6, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{shopData?.name}</div>
             <div className="brand-sub">{role === 'owner' ? '👑 मालिक' : '🔑 क्यासियर'}</div>
           </div>
