@@ -87,12 +87,17 @@ export default function Dashboard({ shopId, shopData, role, user, lang, onNav, o
       <div className="page-body">
         <WelcomeBanner name={user?.displayName} shopName={shopData?.name} isAdmin={isAdmin} onAdmin={onAdminPanel}/>
 
-        <div className="hero-card">
-          <p style={{ fontSize:12, opacity:.75, margin:0 }}>आजको नाफा · {fmtBS(Date.now(),lang)}</p>
-          <p style={{ fontSize:28, fontWeight:900, margin:'6px 0 8px', color: profit >= 0 ? '#fff' : '#fecaca' }}>{fmt(profit)}</p>
-          <div style={{ display:'flex', gap:16, fontSize:12, opacity:.85 }}>
-            <span>बिक्री {fmt(sale)}</span>
-            <span>खर्च {fmt(exp+purch)}</span>
+        {/* Karobar-style summary cards */}
+        <div className="summary-cards-container">
+          <div className="summary-card summary-card-get">
+            <p className="summary-label">Total To Get</p>
+            <p className="summary-amount">{fmt(Math.max(0, totalUdharo))}</p>
+            <p className="summary-sub">Amount receivable</p>
+          </div>
+          <div className="summary-card summary-card-give">
+            <p className="summary-label">Total To Give</p>
+            <p className="summary-amount">{fmt(Math.abs(Math.min(0, totalUdharo)))}</p>
+            <p className="summary-sub">Amount payable</p>
           </div>
         </div>
 

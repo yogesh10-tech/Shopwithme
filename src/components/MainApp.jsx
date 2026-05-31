@@ -43,17 +43,16 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
   const logout = () => { signOut(auth).then(onLogout); };
 
   const ownerNav = [
-    { id:'dash',  icon:'home',     label:'गृह' },
-    { id:'tx',    icon:'money',    label:'कारोबार' },
-    { id:'party', icon:'users',    label:'पार्टी' },
-    { id:'rep',   icon:'chart',    label:'रिपोर्ट' },
-    { id:'more',  icon:'settings', label:'अझै' },
+    { id:'dash',  icon:'home',     label:'Home' },
+    { id:'party', icon:'users',    label:'Khata' },
+    { id:'inv',   icon:'box',      label:'Items' },
+    { id:'more',  icon:'settings', label:'More' },
   ];
   const cashierNav = [
-    { id:'dash',  icon:'home',     label:'गृह' },
-    { id:'tx',    icon:'money',    label:'कारोबार' },
-    { id:'bills', icon:'file',     label:'बिल' },
-    { id:'set',   icon:'settings', label:'सेटिङ' },
+    { id:'dash',  icon:'home',     label:'Home' },
+    { id:'party', icon:'users',    label:'Khata' },
+    { id:'bills', icon:'file',     label:'Items' },
+    { id:'set',   icon:'settings', label:'More' },
   ];
   const activeNav = role === 'owner' ? ownerNav : cashierNav;
 

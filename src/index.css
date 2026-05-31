@@ -165,3 +165,27 @@ input[type=date].inp{color-scheme:light;}
 .admin-welcome p{margin:6px 0 0;font-size:12px;opacity:.85;}
 .admin-menu-card{border:2px solid #c7d2fe!important;background:linear-gradient(135deg,#eef2ff,#f5f3ff)!important;}
 [data-dark="true"] .admin-menu-card{background:linear-gradient(135deg,#1e1b4b,#312e81)!important;border-color:#4338ca!important;}
+
+/* Karobar Summary Cards */
+.summary-cards-container{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.summary-card{border-radius:20px;padding:24px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.1);min-height:140px;position:relative;overflow:hidden;}
+.summary-card::before{content:'';position:absolute;inset:0;opacity:.05;z-index:0;}
+.summary-card > *{position:relative;z-index:1;}
+.summary-card-get{background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:#fff;}
+.summary-card-get::before{background:radial-gradient(circle at 100% 0%,rgba(255,255,255,.2),transparent);}
+.summary-card-give{background:linear-gradient(135deg,#ef4444 0%,#dc2626 100%);color:#fff;}
+.summary-card-give::before{background:radial-gradient(circle at 100% 0%,rgba(255,255,255,.2),transparent);}
+[data-dark="true"] .summary-card{box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.summary-label{font-size:13px;font-weight:700;opacity:.9;margin:0 0 8px;letter-spacing:.5px;text-transform:uppercase;}
+.summary-amount{font-size:28px;font-weight:900;margin:0 0 4px;line-height:1;}
+.summary-sub{font-size:11px;opacity:.85;margin:0;font-weight:500;}
+@media(max-width:599px){
+  .summary-cards-container{grid-template-columns:1fr;gap:10px;}
+  .summary-card{padding:20px 14px;min-height:120px;}
+  .summary-amount{font-size:24px;}
+}
+@media(min-width:900px){
+  .summary-cards-container{margin-bottom:16px;}
+  .summary-card{min-height:160px;padding:28px 20px;}
+  .summary-amount{font-size:32px;}
+}
