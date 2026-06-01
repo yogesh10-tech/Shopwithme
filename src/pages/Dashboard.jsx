@@ -89,12 +89,12 @@ export default function Dashboard({ shopId, shopData, role, user, lang, onNav, o
 
         {/* Karobar-style summary cards */}
         <div className="summary-cards-container">
-          <button type="button" onClick={()=>onNav('party', 'customer')} className="summary-card summary-card-get" style={{ cursor:'pointer', border:'none', background:'inherit', padding:0 }}>
+          <button type="button" onClick={()=>onNav('party', 'customer')} className="summary-card summary-card-get">
             <p className="summary-label">Total To Get</p>
             <p className="summary-amount">{fmt(Math.max(0, totalUdharo))}</p>
             <p className="summary-sub">Amount receivable</p>
           </button>
-          <button type="button" onClick={()=>onNav('party', 'supplier')} className="summary-card summary-card-give" style={{ cursor:'pointer', border:'none', background:'inherit', padding:0 }}>
+          <button type="button" onClick={()=>onNav('party', 'supplier')} className="summary-card summary-card-give">
             <p className="summary-label">Total To Give</p>
             <p className="summary-amount">{fmt(Math.abs(Math.min(0, totalUdharo)))}</p>
             <p className="summary-sub">Amount payable</p>
