@@ -6,6 +6,8 @@ import { isAdminEmail } from './utils/admin';
 import { oqFlush } from './utils/offlineQueue';
 import { initBarcodeCache } from './utils/barcodeCache';
 import { setupBarcodeSyncListener } from './utils/barcodeSync';
+import { initOfflineStore } from './utils/offlineStore';
+import { setupAllDataListeners, syncAllPendingChanges } from './utils/offlineSync';
 import { useToast } from './hooks/useToast';
 import { ToastComp } from './components/UI';
 import MainApp    from './components/MainApp';
@@ -53,12 +55,17 @@ export default function App() {
 
   // ── Sync offline queue on reconnect ───────────────────────────────────────
   useEffect(() => {
-    const handler = () => oqFlush(toast);
+    const handler = async () => {
+      await oqFlush(toast);
+      await syncAllPendingChanges(shopId, toast);
+    };
     window.addEventListener('online', handler);
     // Also try immediately in case we're already online
-    oqFlush(toast);
+    if (navigator.onLine && shopId) {
+      handler();
+    }
     return () => window.removeEventListener('online', handler);
-  }, []);
+  }, [shopId]);
 
   // ── Hide HTML splash once React renders ───────────────────────────────────
   useEffect(() => {
@@ -70,14 +77,18 @@ export default function App() {
     setShopId(sid);
     if (shopUnsub.current) shopUnsub.current();
     
-    // Setup barcode sync listener
+    // Setup comprehensive offline system
     const barcodeSyncUnsub = setupBarcodeSyncListener(sid);
+    const allDataListenersUnsub = setupAllDataListeners(sid);
     
     shopUnsub.current = onValue(ref(db, `shops/${sid}`), snap => {
       const data = snap.val();
       if (data) {
         setShopData({ id: sid, ...data });
         setMemberData((data.members || {})[uid] || {});
+        
+        // Initialize complete offline store with all data
+        initOfflineStore(data);
         
         // Initialize barcode cache with inventory items
         if (data.inventory) {
@@ -90,10 +101,11 @@ export default function App() {
       }
     });
     
-    // Return cleanup function that also unsubs barcode sync
+    // Return cleanup function
     return () => {
       if (shopUnsub.current) shopUnsub.current();
       barcodeSyncUnsub();
+      allDataListenersUnsub();
     };
   };
 
