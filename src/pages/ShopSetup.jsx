@@ -2,11 +2,16 @@ import { useState } from 'react';
 import { ref, push, set, get, query, orderByChild, equalTo } from 'firebase/database';
 import { auth, db } from '../firebase';
 
-export default function ShopSetup({ user, onDone, isAdmin, onAdmin }) {
+export default function ShopSetup({ user, onDone, isAdmin, onAdmin, allowSkip = false }) {
   const [tab,  setTab]  = useState('create');
   const [f,    setF]    = useState({ name:'', type:'grocery', code:'' });
   const [busy, setBusy] = useState(false);
   const [err,  setErr]  = useState('');
+
+  const skipSetupForOffline = () => {
+    localStorage.setItem(`meropasal_setup_skipped_${user.uid}`, 'true');
+    onDone(null); // Pass null to indicate skipped setup
+  };
 
   const createShop = async () => {
     if (!f.name.trim()) { setErr('पसलको नाम लेख्नुहोस्'); return; }
@@ -66,6 +71,12 @@ export default function ShopSetup({ user, onDone, isAdmin, onAdmin }) {
               <button key={v} onClick={()=>{setTab(v);setErr('');}} style={{ padding:'11px 6px', borderRadius:14, border:`2px solid ${tab===v?'var(--p3)':'var(--bdr)'}`, background:tab===v?'var(--pl)':'transparent', color:tab===v?'var(--p2)':'var(--sub)', fontWeight:700, fontSize:12, cursor:'pointer' }}>{l}</button>
             ))}
           </div>
+
+          {allowSkip && !navigator.onLine && (
+            <button type="button" onClick={skipSetupForOffline} style={{ width:'100%', marginBottom:12, padding:'10px', borderRadius:14, border:'2px solid var(--bdr)', background:'transparent', color:'var(--sub)', fontWeight:700, fontSize:12, cursor:'pointer' }}>
+              📵 ऑफलाइन मोडमा प्रयोग गर्नुस्
+            </button>
+          )}
 
           {tab === 'create' ? (
             <div style={{ display:'flex', flexDirection:'column', gap:12 }}>

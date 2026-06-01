@@ -15,9 +15,18 @@ import {
   validateBarcodeIntegrity,
   getBarcodeSyncStats,
 } from '../utils/barcodeSync';
+import {
+  exportToCSV,
+  exportToJSON,
+  importFromCSV,
+  importFromJSON,
+  generateBulkBarcodes,
+  validateAndDeduplicateBarcodes,
+} from '../utils/barcodeExport';
 
 const BarcodeManager = ({ shopId, role, toast }) => {
   const [items, setItems] = useState([]);
+  const [allItems, setAllItems] = useState([]);
   const [cacheStats, setCacheStats] = useState(null);
   const [syncStats, setSyncStats] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -25,16 +34,20 @@ const BarcodeManager = ({ shopId, role, toast }) => {
   const [search, setSearch] = useState('');
   const [showCacheInfo, setShowCacheInfo] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [showBulkMenu, setShowBulkMenu] = useState(false);
 
-  // Load inventory items with barcodes
+  // Load ALL inventory items (not just ones with barcodes)
   useEffect(() => {
     const r = ref(db, `shops/${shopId}/inventory`);
     const u = onValue(r, s => {
       const data = s.val();
       if (data) {
-        const itemList = oa(data).filter(item => item.barcode).sort((a, b) =>
+        const allItemList = oa(data).sort((a, b) =>
           (a.name || '').localeCompare(b.name || '')
         );
+        setAllItems(allItemList);
+        
+        const itemList = allItemList.filter(item => item.barcode);
         setItems(itemList);
       }
     });
@@ -102,6 +115,91 @@ const BarcodeManager = ({ shopId, role, toast }) => {
     
     if (ean13) {
       setNewBarcode(ean13);
+    }
+  };
+
+  // Bulk operations handlers
+  const handleBulkGenerateEAN13 = async () => {
+    const itemsWithoutBarcodes = allItems.filter(item => !item.barcode);
+    if (itemsWithoutBarcodes.length === 0) {
+      toast('✓ सभी उत्पादों के पास बारकोड हैं');
+      return;
+    }
+
+    setBusy(true);
+    try {
+      let generated = 0;
+      for (const item of itemsWithoutBarcodes) {
+        const prefix = '978';
+        const timestamp = Date.now().toString().slice(-6);
+        const idNum = item.id.slice(0, 3).padEnd(3, '0');
+        const base = prefix + timestamp.substring(0, 3) + idNum;
+        const ean13 = generateEAN13Checksum(base.substring(0, 12));
+
+        if (ean13) {
+          const itemRef = ref(db, `shops/${shopId}/inventory/${item.id}`);
+          await update(itemRef, { barcode: ean13, updatedAt: Date.now() });
+          generated++;
+        }
+      }
+      toast(`✓ ${generated} बारकोड जेनरेट भए`);
+      setShowBulkMenu(false);
+    } catch (err) {
+      toast('त्रुटि भयो');
+      console.error(err);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleExportCSV = () => {
+    exportToCSV(items, `barcodes-${Date.now()}.csv`);
+    toast('📥 CSV डाउनलोड भयो');
+  };
+
+  const handleExportJSON = () => {
+    exportToJSON(items, `barcodes-${Date.now()}.json`);
+    toast('📥 JSON डाउनलोड भयो');
+  };
+
+  const handleImportCSV = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setBusy(true);
+    try {
+      const result = await importFromCSV(file);
+      if (!result.success) {
+        toast(`त्रुटि: ${result.error}`);
+        return;
+      }
+
+      const validation = validateAndDeduplicateBarcodes(result.data, items);
+      if (validation.valid.length === 0) {
+        toast('⚠️ कोई मान्य बारकोड नहीं मिला');
+        return;
+      }
+
+      let updated = 0;
+      for (const item of validation.valid) {
+        const existing = allItems.find(p => p.id === item.id);
+        if (existing) {
+          const itemRef = ref(db, `shops/${shopId}/inventory/${item.id}`);
+          await update(itemRef, { barcode: item.barcode, updatedAt: Date.now() });
+          updated++;
+        }
+      }
+
+      toast(`✓ ${updated} बारकोड इम्पोर्ट भए`);
+      if (validation.duplicates.length > 0) {
+        toast(`⚠️ ${validation.duplicates.length} डुप्लिकेट छोडे गए`);
+      }
+    } catch (err) {
+      toast('इम्पोर्ट विफल');
+      console.error(err);
+    } finally {
+      setBusy(false);
+      event.target.value = '';
     }
   };
 
@@ -186,20 +284,131 @@ const BarcodeManager = ({ shopId, role, toast }) => {
         )}
 
         {/* Search */}
-        <input
-          type="text"
-          placeholder="बारकोड वा वस्तुको नाम..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '10px 12px',
-            borderRadius: 10,
-            border: '1px solid #ddd',
-            marginBottom: 16,
-            fontSize: 14,
-          }}
-        />
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <input
+            type="text"
+            placeholder="बारकोड वा वस्तुको नाम..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              flex: 1,
+              padding: '10px 12px',
+              borderRadius: 10,
+              border: '1px solid #ddd',
+              fontSize: 14,
+            }}
+          />
+          <button
+            onClick={() => setShowBulkMenu(!showBulkMenu)}
+            style={{
+              padding: '10px 12px',
+              borderRadius: 10,
+              border: 'none',
+              backgroundColor: '#4f46e5',
+              color: '#fff',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: 12,
+            }}
+            title="बारकोड संचालन"
+          >
+            ⚙️ थोक
+          </button>
+        </div>
+
+        {/* Bulk Operations Menu */}
+        {showBulkMenu && (
+          <div
+            style={{
+              background: '#f8f9fa',
+              border: '2px solid #4f46e5',
+              borderRadius: 12,
+              padding: 12,
+              marginBottom: 16,
+            }}
+          >
+            <p style={{ margin: '0 0 12px', fontWeight: 600, color: 'var(--txt)' }}>
+              ⚙️ थोक संचालन
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8 }}>
+              <button
+                onClick={handleBulkGenerateEAN13}
+                disabled={busy || allItems.filter(i => !i.barcode).length === 0}
+                style={{
+                  padding: '10px',
+                  backgroundColor: '#10b981',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  opacity: busy || allItems.filter(i => !i.barcode).length === 0 ? 0.5 : 1,
+                }}
+              >
+                🔢 सभी EAN-13
+              </button>
+              <button
+                onClick={handleExportCSV}
+                disabled={busy}
+                style={{
+                  padding: '10px',
+                  backgroundColor: '#3b82f6',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  opacity: busy ? 0.5 : 1,
+                }}
+              >
+                📥 CSV
+              </button>
+              <button
+                onClick={handleExportJSON}
+                disabled={busy}
+                style={{
+                  padding: '10px',
+                  backgroundColor: '#8b5cf6',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  opacity: busy ? 0.5 : 1,
+                }}
+              >
+                📥 JSON
+              </button>
+              <label
+                style={{
+                  padding: '10px',
+                  backgroundColor: '#f59e0b',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  textAlign: 'center',
+                  opacity: busy ? 0.5 : 1,
+                  pointerEvents: busy ? 'none' : 'auto',
+                }}
+              >
+                📤 CSV इम्पोर्ट
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleImportCSV}
+                  disabled={busy}
+                  style={{ display: 'none' }}
+                />
+              </label>
+            </div>
+          </div>
+        )}
 
         {/* Items List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

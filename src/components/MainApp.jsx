@@ -13,7 +13,7 @@ import Bills       from '../pages/Bills';
 import Settings    from '../pages/Settings';
 import BarcodeManager from '../pages/BarcodeManager';
 
-export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, toasts, onAdminPanel, onLogout }) {
+export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, toasts, onAdminPanel, onLogout, setupIncomplete, onOpenSetup }) {
   const [page, setPage]   = useState('dash');
   const [dark, setDark]   = useState(() => localStorage.getItem('meropasal_dark') === '1');
   const [lang, setLang]   = useState(() => localStorage.getItem('meropasal_lang') || 'ne');

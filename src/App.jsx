@@ -22,6 +22,7 @@ export default function App() {
   const [shopData,  setShopData]  = useState(null);
   const [memberData,setMemberData]= useState({});
   const [adminView, setAdminView] = useState(false);
+  const [setupSkipped, setSetupSkipped] = useState(false);
 
   useEffect(() => {
     if (isAdminEmail(user?.email) && user && !shopId) setAdminView(true);
@@ -38,6 +39,8 @@ export default function App() {
       if (timeout) clearTimeout(timeout);
       if (u) {
         setUser(u);
+        const isSkipped = localStorage.getItem(`meropasal_setup_skipped_${u.uid}`) === 'true';
+        setSetupSkipped(isSkipped);
         try {
           const snap = await get(ref(db, `users/${u.uid}/shopId`));
           if (snap.val()) attachShop(snap.val(), u.uid);
@@ -47,6 +50,7 @@ export default function App() {
         setShopId(null);
         setShopData(null);
         setMemberData({});
+        setSetupSkipped(false);
       }
     });
 
@@ -149,9 +153,13 @@ export default function App() {
   );
 
   // ── Logged in but no shop ──────────────────────────────────────────────────
-  if (!shopId || !shopData) return (
+  // Allow access if setup is skipped (offline mode), otherwise show setup page
+  if (!shopId && !setupSkipped) return (
     <>
-      <ShopSetup user={user} onDone={sid => attachShop(sid, user.uid)} isAdmin={isAdmin} onAdmin={() => setAdminView(true)}/>
+      <ShopSetup user={user} onDone={sid => {
+        if (sid) attachShop(sid, user.uid);
+        else setSetupSkipped(true); // User skipped setup
+      }} isAdmin={isAdmin} onAdmin={() => setAdminView(true)} allowSkip={true}/>
       <ToastComp toasts={toasts}/>
     </>
   );
@@ -171,7 +179,8 @@ export default function App() {
   );
 
   // ── Main app ───────────────────────────────────────────────────────────────
-  return (
+  // Allow app access even with no shop if setup is skipped (offline mode)
+  if (user && (setupSkipped || shopId)) return (
     <>
       <MainApp
         user={user}
@@ -183,6 +192,8 @@ export default function App() {
         toasts={toasts}
         onAdminPanel={() => setAdminView(true)}
         onLogout={logout}
+        setupIncomplete={setupSkipped && !shopId}
+        onOpenSetup={() => setAdminView(false)} // Reset to main app, user can access settings
       />
       <ToastComp toasts={toasts}/>
     </>
