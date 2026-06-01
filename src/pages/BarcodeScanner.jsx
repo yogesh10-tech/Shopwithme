@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Quagga from 'quagga';
 import { Modal, Ic } from '../components/UI';
 import { fmt } from '../utils/date';
+import { loadBarcodeCache, findByBarcode, updateBarcodeCacheEntry } from '../utils/barcodeCache';
 
 export default function BarcodeScanner({ products, onSelect, onClose }) {
   const [detected, setDetected] = useState(null);
@@ -9,8 +10,24 @@ export default function BarcodeScanner({ products, onSelect, onClose }) {
   const [quantity, setQuantity] = useState('1');
   const [scanning, setScanning] = useState(true);
   const [error, setError] = useState(null);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [cacheHit, setCacheHit] = useState(false);
   const videoRef = useRef(null);
   const scannedCodesRef = useRef(new Set());
+
+  // Track online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (!scanning) return;
@@ -84,7 +101,28 @@ export default function BarcodeScanner({ products, onSelect, onClose }) {
     scannedCodesRef.current.add(code);
 
     // Try exact barcode match first
-    const exactMatch = products.find(p => p.barcode === code);
+    let exactMatch = products.find(p => p.barcode === code);
+
+    // If not found in products, check cache for offline data
+    let fromCache = false;
+    if (!exactMatch && isOffline) {
+      const cacheEntry = findByBarcode(code);
+      if (cacheEntry) {
+        // Convert cache entry to product format
+        exactMatch = {
+          id: cacheEntry.id,
+          barcode: cacheEntry.barcode,
+          name: cacheEntry.name,
+          category: cacheEntry.category,
+          sellP: cacheEntry.sellP,
+          stock: cacheEntry.stock,
+          unit: cacheEntry.unit,
+        };
+        fromCache = true;
+        setCacheHit(true);
+      }
+    }
+
     if (exactMatch) {
       setDetected(exactMatch);
       setMatches([exactMatch]);
@@ -107,7 +145,7 @@ export default function BarcodeScanner({ products, onSelect, onClose }) {
       setScanning(false);
     } else {
       // Show error and continue scanning
-      setError(`वस्तु नफेला - कोड: ${code}`);
+      setError(`वस्तु नफेला - कोड: ${code}${isOffline ? ' (ऑफलाइन)' : ''}`);
       setTimeout(() => setError(null), 2000);
     }
   };
@@ -120,6 +158,19 @@ export default function BarcodeScanner({ products, onSelect, onClose }) {
   const handleConfirm = () => {
     const qty = parseFloat(quantity) || 1;
     if (detected && qty > 0) {
+      // Update cache if this was a cache hit
+      if (cacheHit && detected.id) {
+        updateBarcodeCacheEntry({
+          id: detected.id,
+          barcode: detected.barcode,
+          name: detected.name,
+          category: detected.category,
+          sellP: detected.sellP,
+          stock: detected.stock,
+          unit: detected.unit,
+          updatedAt: Date.now(),
+        });
+      }
       onSelect({
         product: detected,
         quantity: qty,
@@ -133,11 +184,12 @@ export default function BarcodeScanner({ products, onSelect, onClose }) {
     setMatches([]);
     setQuantity('1');
     setError(null);
+    setCacheHit(false);
     setScanning(true);
   };
 
   return (
-    <Modal onClose={onClose} title="📸 बारकोड स्क्यान्न">
+    <Modal onClose={onClose} title={`📸 बारकोड स्क्यान्न${isOffline ? ' (📵 ऑफलाइन)' : ''}`}>
       {error && (
         <div
           style={{
@@ -152,6 +204,23 @@ export default function BarcodeScanner({ products, onSelect, onClose }) {
           }}
         >
           {error}
+        </div>
+      )}
+
+      {cacheHit && (
+        <div
+          style={{
+            background: '#dbeafe',
+            border: '1px solid #7dd3fc',
+            borderRadius: 12,
+            padding: '12px',
+            marginBottom: 12,
+            color: '#0369a1',
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          💾 यो डेटा ऑफलाइन क्याशबाट आयो
         </div>
       )}
 

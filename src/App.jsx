@@ -4,6 +4,8 @@ import { ref, get, onValue } from 'firebase/database';
 import { auth, db } from './firebase';
 import { isAdminEmail } from './utils/admin';
 import { oqFlush } from './utils/offlineQueue';
+import { initBarcodeCache } from './utils/barcodeCache';
+import { setupBarcodeSyncListener } from './utils/barcodeSync';
 import { useToast } from './hooks/useToast';
 import { ToastComp } from './components/UI';
 import MainApp    from './components/MainApp';
@@ -67,13 +69,32 @@ export default function App() {
   const attachShop = (sid, uid) => {
     setShopId(sid);
     if (shopUnsub.current) shopUnsub.current();
+    
+    // Setup barcode sync listener
+    const barcodeSyncUnsub = setupBarcodeSyncListener(sid);
+    
     shopUnsub.current = onValue(ref(db, `shops/${sid}`), snap => {
       const data = snap.val();
       if (data) {
         setShopData({ id: sid, ...data });
         setMemberData((data.members || {})[uid] || {});
+        
+        // Initialize barcode cache with inventory items
+        if (data.inventory) {
+          const items = Object.entries(data.inventory).map(([id, item]) => ({
+            id,
+            ...item,
+          }));
+          initBarcodeCache(items);
+        }
       }
     });
+    
+    // Return cleanup function that also unsubs barcode sync
+    return () => {
+      if (shopUnsub.current) shopUnsub.current();
+      barcodeSyncUnsub();
+    };
   };
 
   const logout = async () => {

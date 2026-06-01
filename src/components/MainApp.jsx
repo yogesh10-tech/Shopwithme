@@ -11,6 +11,7 @@ import Inventory   from '../pages/Inventory';
 import Reports     from '../pages/Reports';
 import Bills       from '../pages/Bills';
 import Settings    from '../pages/Settings';
+import BarcodeManager from '../pages/BarcodeManager';
 
 export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, toasts, onAdminPanel, onLogout }) {
   const [page, setPage]   = useState('dash');
@@ -78,6 +79,7 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
             )}
             {[
               { id:'inv', icon:'box', label:'सूची / स्टक', desc:'सामान व्यवस्थापन' },
+              { id:'barcode', icon:'barcode', label:'🏷️ बारकोड', desc:'बारकोड व्यवस्थापन' },
               { id:'bills', icon:'file', label:'बिल', desc:'इनभ्वाइस हेर्नुहोस्' },
               { id:'set', icon:'settings', label:'सेटिङ', desc:'पसल, भाषा, सदस्य' },
             ].map(item => (
@@ -102,12 +104,13 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
       party: <Parties    shopId={shopId} t={{}} lang={lang} toast={toast} initialTab={partyTab}/>,
       rep:   <Reports    shopId={shopId} lang={lang} toast={toast}/>,
       bills: <Bills      shopId={shopId} shopData={shopData} lang={lang} toast={toast}/>,
+      barcode: <BarcodeManager shopId={shopId} role={role} toast={toast}/>,
       set:   <Settings   shopId={shopId} shopData={shopData} user={user} role={role} lang={lang} setLang={setLang} dark={dark} setDark={setDark} onLogout={logout} members={members} toast={toast} isAdmin={isAdmin} onAdminPanel={onAdminPanel}/>,
     };
     return pages[page] || pages.dash;
   };
 
-  const navPage = ['inv','bills','set'].includes(page) ? 'more' : page;
+  const navPage = ['inv','bills','barcode','set'].includes(page) ? 'more' : page;
 
   return (
     <div data-dark={dark} style={{ height:'100%' }}>
@@ -126,7 +129,7 @@ export default function MainApp({ user, shopId, shopData, role, isAdmin, toast, 
             </button>
           )}
           <nav style={{ flex:1, display:'flex', flexDirection:'column', gap:2 }}>
-            {(role === 'owner' ? [...ownerNav, { id:'inv', icon:'box', label:'सूची' }, { id:'bills', icon:'file', label:'बिल' }] : cashierNav).map(item => {
+            {(role === 'owner' ? [...ownerNav, { id:'inv', icon:'box', label:'सूची' }, { id:'barcode', icon:'barcode', label:'बारकोड' }, { id:'bills', icon:'file', label:'बिल' }] : cashierNav).map(item => {
               const act = page === item.id || (item.id === 'more' && ['inv','bills','set'].includes(page));
               return (
                 <button key={item.id} type="button" onClick={() => setPage(item.id)} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', borderRadius:12, border:'none', background:act?'var(--pl)':'transparent', cursor:'pointer', color:act?'var(--p2)':'var(--sub)', fontWeight:act?700:500, fontSize:14, textAlign:'left', width:'100%' }}>
