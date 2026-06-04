@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import Quagga from 'quagga';
+import Quagga from "@ericblade/quagga2";
 import { Modal, Ic } from '../components/UI';
 import { fmt } from '../utils/date';
 import { loadBarcodeCache, findByBarcode, updateBarcodeCacheEntry } from '../utils/barcodeCache';

@@ -2,23 +2,26 @@
   "name": "yoga-shop-app",
   "version": "6.0.0",
   "private": true,
+  "homepage": "https://yogesh10-tech.github.io/Shopwithme",
   "scripts": {
     "dev": "vite",
     "icons": "node scripts/gen-pwa-icons.mjs",
     "build": "npm run icons && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@ericblade/quagga2": "^1.7.3",
     "firebase": "^10.7.0",
     "html2canvas": "^1.4.1",
     "jsbarcode": "^3.12.3",
     "jspdf": "^4.2.1",
-    "quagga": "^0.12.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",
+    "gh-pages": "^6.0.0",
     "sharp": "^0.33.5",
     "vite": "^5.0.0",
     "vite-plugin-pwa": "^0.17.0"
