@@ -165,7 +165,7 @@ export default function App() {
   );
 
   // ── Suspended ─────────────────────────────────────────────────────────────
-  if (shopData.status === 'suspended') return (
+  if (shopData?.status === 'suspended') return (
     <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:16, padding:24, background:'var(--bg)' }}>
       <span style={{ fontSize:48 }}>🔒</span>
       <h2 style={{ fontWeight:900, color:'var(--txt)', margin:0 }}>पसल निलम्बित</h2>
